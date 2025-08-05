@@ -1,6 +1,3 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
-
 let camera, scene, renderer;
 let controller, reticle, mixer, clock;
 let model = null;
