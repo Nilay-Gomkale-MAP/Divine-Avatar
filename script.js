@@ -50,7 +50,7 @@ async function init() {
   clock = new THREE.Clock();
 
   // Load model
-  const loader = new GLTFLoader();
+  const loader = new THREE.GLTFLoader();
   loader.load('model.glb', function (gltf) {
     model = gltf.scene;
     model.scale.set(0.2, 0.2, 0.2);
@@ -66,18 +66,17 @@ async function init() {
   const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
   reticle = new THREE.Mesh(geometry, material);
   reticle.visible = false;
-  scene.add(reticle);
+    scene.add(reticle);
 
-  // WebXR support check
-  if (!navigator.xr) {
-    alert("WebXR not supported on this device/browser.");
-    return;
-  }
-  const isSupported = await navigator.xr.isSessionSupported('immersive-ar');
-  if (!isSupported) {
-    alert("AR not supported on this device.");
-    return;
-  }
+    if (!navigator.xr) {
+        alert("WebXR not supported on this device/browser.");
+    } else {
+        navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+            if (!supported) {
+                alert("AR not supported on this device.");
+            }
+        });
+    }
 
   const session = await navigator.xr.requestSession('immersive-ar', {
     requiredFeatures: ['hit-test', 'dom-overlay'],
@@ -108,6 +107,7 @@ async function init() {
   });
   scene.add(controller);
 
+  // Store multiple mixers for each placed instance
   window.mixers = [];
 
   renderer.setAnimationLoop((timestamp, frame) => {
