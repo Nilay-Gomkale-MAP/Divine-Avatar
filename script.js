@@ -50,7 +50,7 @@ async function init() {
   clock = new THREE.Clock();
 
   // Load model
-  const loader = new THREE.GLTFLoader();
+  const loader = new GLTFLoader();
   loader.load('model.glb', function (gltf) {
     model = gltf.scene;
     model.scale.set(0.2, 0.2, 0.2);
