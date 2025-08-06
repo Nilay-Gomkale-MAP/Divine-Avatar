@@ -67,6 +67,7 @@
         scene.addEventListener('enter-vr', () => {
             if (!scene.is('ar-mode')) return;
 
+            model.setAttribute('visible', false);
             scene.addEventListener('ar-hit-test-achieved', (event) => {
             // Show reticle when surface is detected
             reticle.setAttribute('visible', true);
