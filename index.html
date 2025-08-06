@@ -14,9 +14,10 @@
         <a-scene
             renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true;"
             webxr="mode: ar; requiredFeatures: hit-test;"
-            xr-mode-ui="enabled: true; XRMode: ar;"
+            xr-mode-ui="enabled: true; XRMode: ar; enterAREnabled: true"
             vr-mode-ui="enabled: false"
             ar-hit-test="target:#vahan";
+            style="background: transparent;"
         >
         <a-assets>
         <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
