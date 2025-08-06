@@ -1,79 +1,70 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-hit-test@2.0.0/dist/aframe-hit-test.min.js"></script>
-    <style>
-      body, html { margin: 0; overflow: hidden; height: 100%; background: transparent; }
-    </style>
-  </head>
-  <body>
-    <a-scene
-      renderer="alpha: true"
-      webxr="mode: ar; requiredFeatures: hit-test;"
-      xr-mode-ui="enabled: true; XRMode: ar;"
-      vr-mode-ui="enabled: false"
-      hit-test
-    >
-      <a-assets>
-        <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
-      </a-assets>
+    <head>
+        <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
+        <style>
+            body, html, canvas { margin: 0; overflow: hidden; height: 100%; background-color: transparent !important;}
+            
+        </style>
+    </head>
 
-      <a-entity
+    <body>
+        <a-scene
+            renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true;"
+            webxr="mode: ar; requiredFeatures: hit-test;"
+            xr-mode-ui="enabled: true; XRMode: ar"
+            vr-mode-ui="enabled: false"
+            style="background: transparent;"
+        >
+        <a-assets>
+        <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Model entity with animation mixer -->
+        <a-entity
         id="vahan"
         gltf-model="#vahanModel"
-        scale="0.5 0.5 0.5"
+        position="0 0 -1"
+        scale="1 1 1"
         animation-mixer
-        visible="false"
-      ></a-entity>
+        visible="true"
+        ></a-entity>
 
-      <a-entity id="reticle" geometry="primitive: ring; radiusInner: 0.05; radiusOuter: 0.06"
-                material="color: green;" rotation="-90 0 0" visible="false"></a-entity>
+        <!-- Camera with orbit controls for desktop and non-AR mode -->
+        <a-entity 
+        camera 
+        look-controls="enabled: false"
+        orbit-controls="target: 0 0 0; enableZoom: true; enablePan: false; initialPosition: 0 0 1; rotateSpeed=10"
+        ></a-entity>
 
-      <a-entity camera look-controls></a-entity>
-      <a-entity light="type: ambient" intensity="1"></a-entity>
-      <a-entity light="type: directional" position="1 1 1" intensity="1"></a-entity>
-    </a-scene>
+        <!-- Basic lighting -->
+        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+        <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
 
+        <!-- Sky background -->
+        <!-- <a-sky color="#ECECEC"></a-sky> -->
+        </a-scene>
+    </body>
     <script>
-      const scene = document.querySelector('a-scene');
-      const model = document.getElementById('vahan');
-      const reticle = document.getElementById('reticle');
-      let placed = false;
+        const scene = document.querySelector('a-scene');
+        const camera = scene.querySelector('[camera]');
 
-      scene.addEventListener('enter-vr', () => {
-        if (!scene.is('ar-mode')) return;
-
-        scene.addEventListener('hit-test-start', () => {
-          reticle.setAttribute('visible', true);
+        scene.addEventListener('enter-vr', () => {
+            if (scene.is('ar-mode')) {
+            // In AR mode: enable look-controls (device pose)
+            camera.setAttribute('look-controls', 'enabled', true);
+            // Disable orbit-controls
+            camera.setAttribute('orbit-controls', 'enabled', false);
+            }
         });
 
-        scene.addEventListener('hit-test-end', () => {
-          reticle.setAttribute('visible', false);
+        scene.addEventListener('exit-vr', () => {
+            // Outside AR mode: disable look-controls (so orbit-controls work better)
+            camera.setAttribute('look-controls', 'enabled', false);
+            // Enable orbit-controls
+            camera.setAttribute('orbit-controls', 'enabled', true);
         });
-
-        scene.addEventListener('hit-test-result', (e) => {
-          if (placed) return;
-          const position = e.detail.position;
-          const rotation = e.detail.rotation;
-
-          reticle.setAttribute('position', position);
-          reticle.setAttribute('rotation', rotation);
-        });
-
-        scene.addEventListener('hit-test-select', () => {
-          placed = true;
-          model.setAttribute('visible', true);
-          const pos = reticle.getAttribute('position');
-          const rot = reticle.getAttribute('rotation');
-
-          model.setAttribute('position', pos);
-          model.setAttribute('rotation', rot);
-
-          // Hide reticle after placement
-          reticle.setAttribute('visible', false);
-        });
-      });
     </script>
-  </body>
 </html>
