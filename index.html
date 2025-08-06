@@ -32,11 +32,21 @@
         visible="true"
         ></a-entity>
 
+        <!-- Reticle is a ring that appears on detected surfaces -->
+        <a-ring
+            id="reticle"
+            radius-inner="0.03"
+            radius-outer="0.04"
+            color="#39BB82"
+            rotation="-90 0 0"
+            visible="false"
+        ></a-ring>
+
         <!-- Camera with orbit controls for desktop and non-AR mode -->
         <a-entity 
         camera 
         look-controls="enabled: false"
-        orbit-controls="target: 0 0 -1; enableZoom: true; enablePan: false; initialPosition: 0 0 1; rotateSpeed=10"
+        orbit-controls="target: 0 0 -1; enableZoom: true; enableRotate: true; enablePan: false; initialPosition: 0 0 1; "
         ></a-entity>
 
         <!-- Basic lighting -->
@@ -49,22 +59,47 @@
     </body>
     <script>
         const scene = document.querySelector('a-scene');
-        const camera = scene.querySelector('[camera]');
+        const reticle = document.querySelector('#reticle');
+        const model = document.querySelector('#model');
+        let placed = false;
 
         scene.addEventListener('enter-vr', () => {
-            if (scene.is('ar-mode')) {
-            // In AR mode: enable look-controls (device pose)
-            camera.setAttribute('look-controls', 'enabled', true);
-            // Disable orbit-controls
-            camera.setAttribute('orbit-controls', 'enabled', false);
+            if (!scene.is('ar-mode')) return;
+
+            scene.addEventListener('ar-hit-test-achieved', (event) => {
+            // Show reticle when surface is detected
+            reticle.setAttribute('visible', true);
+            });
+
+            scene.addEventListener('ar-hit-test-select', () => {
+            if (!placed) {
+                // Place model at reticle position on tap
+                placed = true;
+                reticle.setAttribute('visible', false);
+
+                // Copy position and rotation from reticle
+                const position = reticle.getAttribute('position');
+                const rotation = reticle.getAttribute('rotation');
+
+                model.setAttribute('position', position);
+                model.setAttribute('rotation', rotation);
+                model.setAttribute('visible', true);
             }
+            });
+
+            scene.addEventListener('ar-hit-test-result', (event) => {
+            if (placed) return;
+            // Update reticle position and rotation continuously
+            const {position, rotation} = event.detail;
+            reticle.setAttribute('position', position);
+            reticle.setAttribute('rotation', rotation);
+            });
         });
 
         scene.addEventListener('exit-vr', () => {
-            // Outside AR mode: disable look-controls (so orbit-controls work better)
-            camera.setAttribute('look-controls', 'enabled', false);
-            // Enable orbit-controls
-            camera.setAttribute('orbit-controls', 'enabled', true);
+            placed = false;
+            // model.setAttribute('visible', false);
+            reticle.setAttribute('visible', false);
         });
     </script>
 </html>
