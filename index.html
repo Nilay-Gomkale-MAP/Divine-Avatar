@@ -14,7 +14,7 @@
         <a-scene
             renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true;"
             webxr="mode: ar; requiredFeatures: hit-test;"
-            xr-mode-ui="enabled: true; XRMode: ar; enterAREnabled: true"
+            xr-mode-ui="enabled: true; XRMode: ar"
             vr-mode-ui="enabled: false"
             ar-hit-test="target:#vahan";
             style="background: transparent;"
@@ -47,4 +47,24 @@
         <!-- <a-sky color="#ECECEC"></a-sky> -->
         </a-scene>
     </body>
+    <script>
+        const scene = document.querySelector('a-scene');
+        const camera = scene.querySelector('[camera]');
+
+        scene.addEventListener('enter-vr', () => {
+            if (scene.is('ar-mode')) {
+            // In AR mode: enable look-controls (device pose)
+            camera.setAttribute('look-controls', 'enabled', true);
+            // Disable orbit-controls
+            camera.setAttribute('orbit-controls', 'enabled', false);
+            }
+        });
+
+        scene.addEventListener('exit-vr', () => {
+            // Outside AR mode: disable look-controls (so orbit-controls work better)
+            camera.setAttribute('look-controls', 'enabled', false);
+            // Enable orbit-controls
+            camera.setAttribute('orbit-controls', 'enabled', true);
+        });
+    </script>
 </html>
