@@ -66,6 +66,7 @@
 
         // Show reticle when surface is detected
         scene.addEventListener('ar-hit-test-achieved', () => {
+            console.log('ar-hit-test-achieved fired');
             if (!placed) reticle.setAttribute('visible', true);
         });
 
@@ -73,8 +74,7 @@
         scene.addEventListener('ar-hit-test-result', (event) => {
             if (placed) return;
             const {position, rotation} = event.detail;
-            // Debug: log position to make sure it's updating
-            console.log('Reticle position:', position);
+            console.log('ar-hit-test-result:', position, rotation);
             reticle.setAttribute('position', position);
             reticle.setAttribute('rotation', rotation);
         });
