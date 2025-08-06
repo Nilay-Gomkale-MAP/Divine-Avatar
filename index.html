@@ -36,8 +36,8 @@
         <!-- Reticle is a ring that appears on detected surfaces -->
         <a-ring
             id="reticle"
-            radius-inner="0.03"
-            radius-outer="0.04"
+            radius-inner="0.05"
+            radius-outer="0.07"
             color="#39BB82"
             rotation="-90 0 0"
             visible="false"
@@ -73,6 +73,8 @@
         scene.addEventListener('ar-hit-test-result', (event) => {
             if (placed) return;
             const {position, rotation} = event.detail;
+            // Debug: log position to make sure it's updating
+            console.log('Reticle position:', position);
             reticle.setAttribute('position', position);
             reticle.setAttribute('rotation', rotation);
         });
@@ -94,16 +96,19 @@
             }
         });
 
+        // When entering AR mode, hide model and reset placement
         scene.addEventListener('enter-vr', () => {
-            if (!scene.is('ar-mode')) return;
-            placed = false;
-            model.setAttribute('visible', false);
-            reticle.setAttribute('visible', false);
+            if (scene.is('ar-mode')) {
+                placed = false;
+                model.setAttribute('visible', false);
+                reticle.setAttribute('visible', false);
+            }
         });
 
+        // When exiting AR mode, show model again for desktop/canvas
         scene.addEventListener('exit-vr', () => {
             placed = false;
-            model.setAttribute('visible', false);
+            model.setAttribute('visible', true);
             reticle.setAttribute('visible', false);
         });
     </script>
