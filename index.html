@@ -11,16 +11,60 @@
     </head>
 
     <body>
-        <!-- Minimal AR test -->
         <a-scene
-          renderer="alpha: true;"
-          webxr="mode: ar; requiredFeatures: hit-test;"
-          xr-mode-ui="enabled: true;"
-          vr-mode-ui="enabled: false"
-          style="background: transparent;"
+            renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true;"
+            webxr="mode: ar; requiredFeatures: hit-test;"
+            xr-mode-ui="enabled: true; XRMode: ar"
+            vr-mode-ui="enabled: false"
+            style="background: transparent;"
         >
-        <a-box position="0 0 -1" color="red"></a-box>
-</a-scene>
-    </body>
-</html>
+        <a-assets>
+        <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
+        </a-assets>
 
+        <!-- Model entity with animation mixer -->
+        <a-entity
+        id="vahan"
+        gltf-model="#vahanModel"
+        position="0 0 -1"
+        scale="1 1 1"
+        animation-mixer
+        visible="true"
+        ></a-entity>
+
+        <!-- Camera with orbit controls for desktop and non-AR mode -->
+        <a-entity 
+        camera 
+        look-controls="enabled: false"
+        orbit-controls="target: 0 0 -1; enableZoom: true; enablePan: false; initialPosition: 0 0 1; rotateSpeed=10"
+        ></a-entity>
+
+        <!-- Basic lighting -->
+        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+        <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
+
+        <!-- Sky background -->
+        <!-- <a-sky color="#ECECEC"></a-sky> -->
+        </a-scene>
+    </body>
+    <script>
+        const scene = document.querySelector('a-scene');
+        const camera = scene.querySelector('[camera]');
+
+        scene.addEventListener('enter-vr', () => {
+            if (scene.is('ar-mode')) {
+            // In AR mode: enable look-controls (device pose)
+            camera.setAttribute('look-controls', 'enabled', true);
+            // Disable orbit-controls
+            camera.setAttribute('orbit-controls', 'enabled', false);
+            }
+        });
+
+        scene.addEventListener('exit-vr', () => {
+            // Outside AR mode: disable look-controls (so orbit-controls work better)
+            camera.setAttribute('look-controls', 'enabled', false);
+            // Enable orbit-controls
+            camera.setAttribute('orbit-controls', 'enabled', true);
+        });
+    </script>
+</html>
