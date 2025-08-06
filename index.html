@@ -1,19 +1,66 @@
+<!DOCTYPE html>
 <html>
-<head>
-  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/jeromeetienne/AR.js/1.7.1/aframe/build/aframe-ar.js"></script>
-</head>
-<body style="margin: 0; overflow: hidden;">
-  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
-    <a-marker preset="hiro">
-      <a-entity 
-        gltf-model="/vahan_model.glb"
-        scale="0.1 0.1 0.1" 
-        position="0 0 0"
+  <head>
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    <!-- Model Animation support -->
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  </head>
+  <body>
+    <button id="playPauseBtn" style="position: fixed; top: 10px; left: 10px; z-index: 10;">
+      Play/Pause Animation
+    </button>
+    <a-scene
+      vr-mode-ui="enabled: false"
+      webxr="optionalFeatures: hit-test;"
+      renderer="colorManagement: true;"
+      embedded
+    >
+      <a-assets>
+        <a-asset-item id="model" src="/vahan_model.glb"></a-asset-item>
+      </a-assets>
+      <a-entity id="ar-model"
+        gltf-model="#model"
+        visible="false"
         animation-mixer>
       </a-entity>
-    </a-marker>
-    <a-entity camera></a-entity>
-  </a-scene>
-</body>
+      <a-camera />
+    </a-scene>
+    <script>
+      // AR tap-to-place fallback (minimal, works in immersive-ar with hit-test)
+      let placed = false;
+      const sceneEl = document.querySelector('a-scene');
+      const entityEl = document.querySelector('#ar-model');
+      
+      sceneEl.addEventListener('enter-vr', function () {
+        if (sceneEl.renderer.xr.isPresenting) {
+          // Show reticle for hit-test (optional)
+          const xrSession = sceneEl.renderer.xr.getSession();
+          const viewerSpace = sceneEl.renderer.xr.getReferenceSpace();
+          xrSession.requestReferenceSpace('viewer').then((refSpace) => {
+            xrSession.requestHitTestSource({space: refSpace}).then((hitTestSource) => {
+              sceneEl.renderer.xr.addEventListener('select', (ev) => {
+                // Attempt to place object at hit location
+                if (!placed && hitTestSource) {
+                  // Needs custom code/reticle for robust placement.
+                  entityEl.setAttribute('visible', true);
+                  placed = true;
+                }
+              });
+            });
+          });
+        }
+      });
+
+      // Simple play/pause animation logic
+      const btn = document.getElementById('playPauseBtn');
+      let isPlaying = true;
+      btn.addEventListener('click', () => {
+        const mixer = entityEl.components['animation-mixer'] && entityEl.components['animation-mixer'].mixer;
+        if (mixer) {
+          mixer.timeScale = isPlaying ? 0 : 1;
+          isPlaying = !isPlaying;
+        }
+      });
+    </script>
+  </body>
 </html>
