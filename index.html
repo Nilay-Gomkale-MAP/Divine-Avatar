@@ -16,6 +16,7 @@
             webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local;"
             xr-mode-ui="enabled: true; XRMode: ar"
             vr-mode-ui="enabled: false"
+            ar-hit-test="target:#vahan"
             style="background: transparent;"
         >
         <a-assets>
@@ -60,7 +61,7 @@
     <script>
         const scene = document.querySelector('a-scene');
         const reticle = document.querySelector('#reticle');
-        const model = document.querySelector('#model');
+        const model = document.querySelector('#vahan');
         let placed = false;
 
         scene.addEventListener('enter-vr', () => {
@@ -98,7 +99,7 @@
 
         scene.addEventListener('exit-vr', () => {
             placed = false;
-            // model.setAttribute('visible', false);
+            model.setAttribute('visible', false);
             reticle.setAttribute('visible', false);
         });
     </script>
