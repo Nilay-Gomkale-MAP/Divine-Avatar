@@ -13,6 +13,7 @@
             webxr="mode: ar; requiredFeatures: hit-test;"
             xr-mode-ui="enabled: true; XRMode: ar;"
             vr-mode-ui="enabled: false"
+            ar-hit-test="target:#vahanModel";
         >
         <a-assets>
         <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
@@ -31,7 +32,7 @@
         <a-entity 
         camera 
         look-controls="enabled: false"
-        orbit-controls="target: 0 0 0; enableZoom: true; enablePan: false; initialPosition: 0 1.6 3"
+        orbit-controls="target: 0 0 0; enableZoom: true; enablePan: false; initialPosition: 0 1.6 3; rotateSpeed=2"
         ></a-entity>
 
         <!-- Basic lighting -->
