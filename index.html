@@ -1,33 +1,23 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-  </head>
-  <body>
-    <a-scene webxr="mode: ar;">
-        <button id="play">Play</button>
-        <button id="pause">Pause</button>
-        <a-sky color="#ECECEC"></a-sky>
-        <a-assets>
-        <a-asset-item id="vahan2D" src="/vahan_model.glb"></a-asset-item>
-        </a-assets>
-        <a-entity camera orbit-controls="target: 0 0 -1; enableZoom: true; enablePan: false;" position="0 1.6 3"></a-entity>
-        <a-entity gltf-model="#vahan2D" position="0 0 -1" animation-mixer></a-entity>
-    </a-scene>
-    <script>
-      var model = document.querySelector('[gltf-model]');
-      var mixer;
-      model.addEventListener('model-loaded', function(e) {
-        mixer = model.components['animation-mixer'];
-      });
-      document.getElementById('play').addEventListener('click', function() {
-        if (mixer) mixer.playAction();
-      });
-      document.getElementById('pause').addEventListener('click', function() {
-        if (mixer) mixer.pauseAction();
-      });
-    </script>
-  </body>
+<head>
+  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/jeromeetienne/AR.js/1.7.1/aframe/build/aframe-ar.js"></script>
+</head>
+<body style="margin : 0px; overflow: hidden;">
+  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
+    <!-- Marker camera controls -->
+    <a-marker-camera preset='hiro'></a-marker-camera>
+
+    <!-- GLB model on the marker -->
+    <a-entity 
+      gltf-model="/vahan_model.glb" 
+      scale="0.5 0.5 0.5"
+      animation-mixer
+      position="0 0 0">
+    </a-entity>
+    
+    <a-entity light="type: directional; intensity: 0.8" position="0 4 0"></a-entity>
+    <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+  </a-scene>
+</body>
 </html>
