@@ -35,7 +35,6 @@
         <!-- Camera with orbit controls for desktop and non-AR mode -->
         <a-entity 
         camera 
-        look-controls="enabled: false"
         orbit-controls="target: 0 0 0; enableZoom: true; enablePan: false; initialPosition: 0 0 1; rotateSpeed=10"
         ></a-entity>
 
@@ -47,24 +46,5 @@
         <!-- <a-sky color="#ECECEC"></a-sky> -->
         </a-scene>
     </body>
-    <script>
-        const scene = document.querySelector('a-scene');
-        const camera = scene.querySelector('[camera]');
-
-        scene.addEventListener('enter-vr', () => {
-            if (scene.is('ar-mode')) {
-            // In AR mode: enable look-controls (device pose)
-            camera.setAttribute('look-controls', 'enabled', true);
-            // Disable orbit-controls
-            camera.setAttribute('orbit-controls', 'enabled', false);
-            }
-        });
-
-        scene.addEventListener('exit-vr', () => {
-            // Outside AR mode: disable look-controls (so orbit-controls work better)
-            camera.setAttribute('look-controls', 'enabled', false);
-            // Enable orbit-controls
-            camera.setAttribute('orbit-controls', 'enabled', true);
-        });
-    </script>
 </html>
+
