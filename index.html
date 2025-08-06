@@ -64,16 +64,21 @@
         const model = document.querySelector('#vahan');
         let placed = false;
 
-        scene.addEventListener('enter-vr', () => {
-            if (!scene.is('ar-mode')) return;
+        // Show reticle when surface is detected
+        scene.addEventListener('ar-hit-test-achieved', () => {
+            if (!placed) reticle.setAttribute('visible', true);
+        });
 
-            model.setAttribute('visible', false);
-            scene.addEventListener('ar-hit-test-achieved', (event) => {
-            // Show reticle when surface is detected
-            reticle.setAttribute('visible', true);
-            });
+        // Update reticle position and rotation continuously
+        scene.addEventListener('ar-hit-test-result', (event) => {
+            if (placed) return;
+            const {position, rotation} = event.detail;
+            reticle.setAttribute('position', position);
+            reticle.setAttribute('rotation', rotation);
+        });
 
-            scene.addEventListener('ar-hit-test-select', () => {
+        // Place model at reticle position on tap
+        scene.addEventListener('ar-hit-test-select', () => {
             if (!placed) {
                 // Place model at reticle position on tap
                 placed = true;
@@ -87,15 +92,13 @@
                 model.setAttribute('rotation', rotation);
                 model.setAttribute('visible', true);
             }
-            });
+        });
 
-            scene.addEventListener('ar-hit-test-result', (event) => {
-            if (placed) return;
-            // Update reticle position and rotation continuously
-            const {position, rotation} = event.detail;
-            reticle.setAttribute('position', position);
-            reticle.setAttribute('rotation', rotation);
-            });
+        scene.addEventListener('enter-vr', () => {
+            if (!scene.is('ar-mode')) return;
+            placed = false;
+            model.setAttribute('visible', false);
+            reticle.setAttribute('visible', false);
         });
 
         scene.addEventListener('exit-vr', () => {
