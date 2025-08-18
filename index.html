@@ -17,20 +17,21 @@
             xr-mode-ui="enabled: true; XRMode: ar"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
-            ar-hit-test="target:#vahan; src:/Reticle_circle.png; enabled: true;"
+            ar-hit-test="target:#vahan; src:Reticle_circle.png; enabled: true;"
         >
         <a-assets>
-        <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
+          <!-- use relative path -->
+          <a-asset-item id="vahanModel" src="vahan_model.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Model entity with animation mixer -->
+        <!-- Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
         <a-entity
-        id="vahan"
-        gltf-model="#vahanModel"
-        position="0 0 -1"
-        scale="1 1 1"
-        animation-mixer
-        visible="true"
+          id="vahan"
+          gltf-model="#vahanModel"
+          position="0 0 -1"
+          scale="1 1 1"
+          animation-mixer
+          visible="false"
         ></a-entity>
 
         <!-- Camera with orbit controls for desktop and non-AR mode -->
