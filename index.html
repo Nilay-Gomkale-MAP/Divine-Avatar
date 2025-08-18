@@ -52,21 +52,110 @@
     <script>
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
+        const model = document.querySelector('#vahan');
 
-        scene.addEventListener('enter-vr', () => {
-            if (scene.is('ar-mode')) {
-            // In AR mode: enable look-controls (device pose)
+        // Create a simple reticle (ring). You can style/change geometry as needed.
+        const reticle = document.createElement('a-entity');
+        reticle.setAttribute('id', 'reticle');
+        reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.03; radiusOuter: 0.05;');
+        reticle.setAttribute('material', 'color: #39f; shader: flat; opacity: 0.9;');
+        reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
+        reticle.setAttribute('visible', 'false');
+        scene.appendChild(reticle);
+
+        // WebXR hit-test variables
+        let xrSession = null;
+        let hitTestSource = null;
+        let localReferenceSpace = null;
+
+        async function startHitTest(session) {
+            // create reference spaces and hit test source
+            localReferenceSpace = await session.requestReferenceSpace('local');
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+
+            // start frame loop
+            session.requestAnimationFrame(onXRFrame);
+        }
+
+        function stopHitTest() {
+            if (hitTestSource) {
+                hitTestSource.cancel && hitTestSource.cancel();
+                hitTestSource = null;
+            }
+            localReferenceSpace = null;
+            xrSession = null;
+            reticle.setAttribute('visible', 'false');
+        }
+
+        function onXRFrame(time, xrFrame) {
+            const session = xrFrame.session;
+
+            // queue next frame
+            session.requestAnimationFrame(onXRFrame);
+
+            if (!hitTestSource) return;
+
+            const hitResults = xrFrame.getHitTestResults(hitTestSource);
+            if (hitResults.length > 0) {
+                const hit = hitResults[0];
+                const pose = hit.getPose(localReferenceSpace);
+                if (pose) {
+                    const pos = pose.transform.position;
+                    const ori = pose.transform.orientation;
+                    // set reticle position/orientation via three.js object3D for accuracy
+                    reticle.object3D.position.set(pos.x, pos.y, pos.z);
+                    reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
+                    reticle.setAttribute('visible', 'true');
+                } else {
+                    reticle.setAttribute('visible', 'false');
+                }
+            } else {
+                reticle.setAttribute('visible', 'false');
+            }
+        }
+
+        function placeModelAtReticle() {
+            if (!reticle.getAttribute('visible')) return;
+            // copy transform from reticle to model
+            model.object3D.position.copy(reticle.object3D.position);
+            model.object3D.quaternion.copy(reticle.object3D.quaternion);
+            model.setAttribute('visible', 'true');
+        }
+
+        // Hook session lifecycle
+        scene.addEventListener('enter-vr', async () => {
+            if (!scene.is('ar-mode')) return;
+
+            // enable device pose controls
             camera.setAttribute('look-controls', 'enabled', true);
-            // Disable orbit-controls
             camera.setAttribute('orbit-controls', 'enabled', false);
+
+            // get session and start hit testing
+            xrSession = scene.renderer.xr.getSession();
+            if (!xrSession) return;
+
+            // some XR implementations already provide a 'select' event on session
+            xrSession.addEventListener('select', () => {
+                placeModelAtReticle();
+            });
+
+            xrSession.addEventListener('end', () => {
+                stopHitTest();
+            });
+
+            try {
+                await startHitTest(xrSession);
+            } catch (err) {
+                console.warn('Hit test start failed:', err);
             }
         });
 
         scene.addEventListener('exit-vr', () => {
-            // Outside AR mode: disable look-controls (so orbit-controls work better)
+            // restore desktop behavior
             camera.setAttribute('look-controls', 'enabled', false);
-            // Enable orbit-controls
             camera.setAttribute('orbit-controls', 'enabled', true);
+            stopHitTest();
         });
     </script>
 </html>
