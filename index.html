@@ -19,6 +19,35 @@
                 background: transparent !important;
                 height: 100%;
             }
+
+            /* hide default A-Frame enter-vr button (we use a custom button) */
+            .a-enter-vr-button {
+                display: none !important;
+            }
+
+            /* custom AR button: white fill, black text, bottom-center */
+            #myEnterARButton, #myExitARButton {
+                position: fixed;
+                bottom: 32px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ffffff;
+                color: #000000;
+                border: none;
+                padding: 16px 24px;
+                border-radius: 4px;
+                font-size: 16px;
+                z-index: 10000;
+                cursor: pointer;
+                /* box-shadow: 0 4px 12px rgba(0,0,0,0.25); */
+                -webkit-tap-highlight-color: transparent;
+                text-decoration: none;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            #myEnterVRButton:hover {
+                background: #0000ff;
+                color: #ffffff;
+            }
         </style>
     </head>
 
@@ -26,7 +55,7 @@
         <a-scene
             renderer="alpha: true;" 
             webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local;"
-            xr-mode-ui="enabled: true; XRMode: ar"
+            xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
             ar-hit-test="target:#vahan; enabled: true;"
@@ -46,25 +75,31 @@
           visible="false"
         ></a-entity>
 
+        <a id="myEnterARButton" href="#">Click to Start AR</a>
+        <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
+        
+
         <!-- Camera with orbit controls for desktop and non-AR mode -->
         <a-entity
           camera
           look-controls="enabled: false"
-          orbit-controls="target: 0 0.2 -1; enableZoom: true; enablePan: true; initialPosition: 0 0.7 0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5"
+          orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5"
         ></a-entity>
 
         <!-- Basic lighting -->
         <a-entity light="type: ambient; intensity: 0.8"></a-entity>
         <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
 
-        <!-- Sky background -->
-        <!-- <a-sky color="#ECECEC"></a-sky> -->
         </a-scene>
     </body>
+    
     <script>
+        // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
         const model = document.querySelector('#vahan');
+        const entryBtn = document.getElementById('myEnterARButton');
+        const exitBtn = document.getElementById('myExitARButton');
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = model.getAttribute('position') || { x: 0, y: 0, z: -1 };
@@ -173,6 +208,16 @@
             } catch (err) {
                 console.warn('Hit test start failed:', err);
             }
+            entryBtn.style.display = 'none'; // hide entry button
+            exitBtn.style.display = 'block'; // show exit button
+        });
+
+        exitBtn.addEventListener('click', async () => {
+                if (scene.is('ar-mode')) {
+                    scene.exitVR();
+                    return;
+                }
+                console.log('Requesting Exit AR');
         });
 
         // Exit AR: restore desktop behaviour and reset model to initial transform
@@ -185,6 +230,12 @@
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
             stopHitTest();
+            entryBtn.style.display = 'block'; // hide entry button
+            exitBtn.style.display = 'none'; // show exit button
+            camera.object3D.position.set(0, 0.5, -0.2); // reset camera position
+            camera.object3D.rotation.set(0, 0, 0); // reset camera rotation
+            model.object3D.position.set(0, 0, -1); // reset model position
+            model.object3D.quaternion.set(0, 0, 0, 1); // reset model rotation
         });
     </script>
-</html>
+ </html>
