@@ -118,10 +118,18 @@
           orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5"
         >
             <a-image
+            id="myExitARButton"
             src="#cancelIconWhite"
-            position="0 0 -1"
+            position="1 0 0"
+            scale="0.2 0.2 0.2"
+            visible="false"
             ></a-image>
         </a-entity>
+
+        <!-- IDEA WHILE TESTING:
+        We can parent a fixed image to the camera like done above to make some creative frames that make enhance the experience, 
+        this way we can take advantage of fixed elements to insert text, clues and more to create an interesting experience
+        -->
 
         <!-- Basic lighting -->
         <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -217,6 +225,7 @@
             placed = false;
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
+            exitBtn.setAttribute('visible', 'true');
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
@@ -262,6 +271,7 @@
             placed = false;
             pageModel.setAttribute('visible', 'true');
             arModel.setAttribute('visible', 'false');
+            exitBtn.setAttribute('visible', 'false');
 
             // restore default position & rotation
             arModel.object3D.position.copy(initialPosition);
