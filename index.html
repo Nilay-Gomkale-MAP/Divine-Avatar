@@ -62,87 +62,6 @@
         </style>
     </head>
 
-    <body>
-
-        <!-- Overlay Section -->
-        <div id="overlay">
-            <button id="exit-ar" style="display: none;">Exit AR</button>
-        </div>
-
-        <!-- Scene Setup Node -->
-        <a-scene
-            renderer="alpha: true;" 
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
-            xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
-            vr-mode-ui="enabled: false"
-            style="background: transparent;"
-            ar-hit-test="target:#arOnly; enabled: true;">
-
-            <!-- Importing Animated Model Asset -->
-            <a-assets>
-            <a-asset-item id="ARModel" src="Toy_Dino_animated.glb"></a-asset-item>
-            </a-assets>
-
-            <!-- Importing Highres Model Asset -->
-            <a-assets>
-                <a-asset-item id="pgModel" src="Toy_Dino_highres.glb"></a-asset-item>
-            </a-assets>
-
-            <!-- AR Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
-            <a-entity
-            id="arOnly"
-            gltf-model="#ARModel"
-            position="0 0 -1"
-            scale="1.4 1.4 1.4"
-            animation-mixer
-            visible="false"
-            ></a-entity>
-
-            <!-- Web Page only model: No animations and should be set to disappear when changed to AR mode-->
-            <a-entity
-            id="pageOnly"
-            gltf-model="#pgModel"
-            position="0 0 -1"
-            scale="1.4 1.4 1.4"
-            visible="true";
-            ></a-entity>
-
-            <!-- Custom AR Entry Buttons-->
-            <a-entity id="myEnterARButton" href="#">Click to Start AR</a-entity>
-            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
-            
-
-            <!-- LEARNING: 
-            <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
-
-            Need to Use DOM Overlay to create an Exit button: 
-            https://github.com/immersive-web/dom-overlays/blob/master/explainer.md => 
-            This worked and found a better guide: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
-
-            or
-
-            Let's create an new 3D entity which is fixed in the top right corner of the screen,
-            and when clicked, it will exit AR mode. => Tried and Failed to figure it out as it became tough to reliably place the Exit button in the top right corner
-            -->
-            
-            <!-- Camera with orbit controls for desktop and non-AR mode -->
-            <a-entity
-            camera
-            look-controls="enabled: false"
-            orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"
-            ></a-entity>
-
-            <!-- IDEA WHILE TESTING:
-            We can parent a fixed image to the camera like done above to make some creative frames that make enhance the experience, 
-            this way we can take advantage of fixed elements to insert text, clues and more to create an interesting experience
-            -->
-
-            <!-- Basic lighting -->
-            <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-            <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
-        </a-scene>
-    </body>
-    
     <script>
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
@@ -294,4 +213,85 @@
             console.log('pageModel position:', pageModel.getAttribute('position'));
         });
     </script>
+
+    <body>
+
+        <!-- Overlay Section -->
+        <div id="overlay">
+            <button id="exit-ar" style="display: none;">Exit AR</button>
+        </div>
+
+        <!-- Scene Setup Node -->
+        <a-scene
+            renderer="alpha: true;" 
+            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
+            xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
+            vr-mode-ui="enabled: false"
+            style="background: transparent;"
+            ar-hit-test="target:#arOnly; enabled: true;">
+
+            <!-- Importing Animated Model Asset -->
+            <a-assets>
+            <a-asset-item id="ARModel" src="Toy_Dino_animated.glb"></a-asset-item>
+            </a-assets>
+
+            <!-- Importing Highres Model Asset -->
+            <a-assets>
+                <a-asset-item id="pgModel" src="Toy_Dino_highres.glb"></a-asset-item>
+            </a-assets>
+
+            <!-- AR Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
+            <a-entity
+            id="arOnly"
+            gltf-model="#ARModel"
+            position="0 0 -1"
+            scale="1.4 1.4 1.4"
+            animation-mixer
+            visible="false"
+            ></a-entity>
+
+            <!-- Web Page only model: No animations and should be set to disappear when changed to AR mode-->
+            <a-entity
+            id="pageOnly"
+            gltf-model="#pgModel"
+            position="0 0 -1"
+            scale="1.4 1.4 1.4"
+            visible="true";
+            ></a-entity>
+
+            <!-- Custom AR Entry Buttons-->
+            <a-entity id="myEnterARButton" href="#">Click to Start AR</a-entity>
+            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
+            
+
+            <!-- LEARNING: 
+            <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
+
+            Need to Use DOM Overlay to create an Exit button: 
+            https://github.com/immersive-web/dom-overlays/blob/master/explainer.md => 
+            This worked and found a better guide: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+
+            or
+
+            Let's create an new 3D entity which is fixed in the top right corner of the screen,
+            and when clicked, it will exit AR mode. => Tried and Failed to figure it out as it became tough to reliably place the Exit button in the top right corner
+            -->
+            
+            <!-- Camera with orbit controls for desktop and non-AR mode -->
+            <a-entity
+            camera
+            look-controls="enabled: false"
+            orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"
+            ></a-entity>
+
+            <!-- IDEA WHILE TESTING:
+            We can parent a fixed image to the camera like done above to make some creative frames that make enhance the experience, 
+            this way we can take advantage of fixed elements to insert text, clues and more to create an interesting experience
+            -->
+
+            <!-- Basic lighting -->
+            <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+            <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
+        </a-scene>
+    </body>
  </html>
