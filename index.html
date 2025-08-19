@@ -277,38 +277,21 @@
 
         // Exit AR: only handle UI here, not model/camera restoration
         scene.addEventListener('exit-vr', () => {
+            placed = false;
+            pageModel.setAttribute('visible', 'true');
+            arModel.setAttribute('visible', 'false');
+            arModel.object3D.position.copy(initialPosition);
+            arModel.object3D.quaternion.copy(initialQuaternion);
+            camera.setAttribute('look-controls', 'enabled', false);
+            camera.setAttribute('orbit-controls', 'enabled', true);
+            pageModel.setAttribute('position', '0 0 -1');
+            pageModel.setAttribute('scale', '1.4 1.4 1.4');
+            pageModel.setAttribute('visible', 'true');
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
             stopHitTest();
-            // Do NOT restore model/camera here!
+            console.log('pageModel visible:', pageModel.getAttribute('visible'));
+            console.log('pageModel position:', pageModel.getAttribute('position'));
         });
-
-        // Handle everything after XR session is truly ended
-        if (scene.renderer && scene.renderer.xr) {
-            scene.renderer.xr.addEventListener('sessionend', () => {
-                setTimeout(() => {
-                    // Restore renderer and model/camera as before
-                    scene.renderer.setSize(window.innerWidth, window.innerHeight);
-                    scene.renderer.setPixelRatio(window.devicePixelRatio);
-                    scene.resize();
-
-                    placed = false;
-                    pageModel.setAttribute('visible', 'true');
-                    arModel.setAttribute('visible', 'false');
-                    arModel.object3D.position.copy(initialPosition);
-                    arModel.object3D.quaternion.copy(initialQuaternion);
-                    camera.setAttribute('look-controls', 'enabled', false);
-                    camera.setAttribute('orbit-controls', 'enabled', true);
-                    pageModel.setAttribute('position', '0 0 -1');
-                    pageModel.setAttribute('scale', '1.4 1.4 1.4');
-                    pageModel.setAttribute('visible', 'true');
-                    console.log('pageModel visible:', pageModel.getAttribute('visible'));
-                    console.log('pageModel position:', pageModel.getAttribute('position'));
-
-                    // --- Add this as a last resort ---
-                    window.location.reload();
-                }, 200);
-            });
-        }
     </script>
  </html>
