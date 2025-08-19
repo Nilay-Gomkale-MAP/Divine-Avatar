@@ -52,22 +52,34 @@
     </head>
 
     <body>
+        <!-- Scene Setup Node -->
         <a-scene
             renderer="alpha: true;" 
             webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local;"
             xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
-            ar-hit-test="target:#vahan; enabled: true;"
+            ar-hit-test="target:#arOnly; enabled: true;"
         >
+
+        <!-- Importing Animated Model Asset -->
         <a-assets>
-          <!-- use relative path -->
-          <a-asset-item id="ARModel" src="Toy_Dino.glb"></a-asset-item>
+          <a-asset-item id="ARModel" src="Toy_Dino_animated.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
+        <!-- Importing Highres Model Asset -->
+        <a-assets>
+            <a-asset-item id="pgModel" src="Toy_Dino_highres.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Importing Cancel Icon White Image -->
+        <a-assets>
+            <img id="cancelIconWhite" src="cancel_Icon_white.png">
+        </a-assets>
+
+        <!-- AR Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
         <a-entity
-          id="vahan"
+          id="arOnly"
           gltf-model="#ARModel"
           position="0 0 -1"
           scale="1.4 1.4 1.4"
@@ -75,7 +87,15 @@
           visible="false"
         ></a-entity>
 
-        <!-- Custom AR Entry and Exit Buttons-->
+        <!-- Web Page only model: No animations and should be set to disappear when changed to AR mode-->
+        <a-entity
+          id="pageOnly"
+          gltf-model="#pgModel"
+          position="0 0 -1"
+          scale="1.4 1.4 1.4"
+        ></a-entity>
+
+        <!-- Custom AR Entry Buttons-->
         <a id="myEnterARButton" href="#">Click to Start AR</a>
         
 
@@ -92,12 +112,16 @@
         -->
         
         <!-- Camera with orbit controls for desktop and non-AR mode -->
-         
         <a-entity
           camera
           look-controls="enabled: false"
           orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5"
-        ></a-entity>
+        >
+            <a-image
+            src="#cancelIconWhite"
+            position="0 0 -1"
+            ></a-image>
+        </a-entity>
 
         <!-- Basic lighting -->
         <a-entity light="type: ambient; intensity: 0.8"></a-entity>
@@ -110,17 +134,15 @@
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
-        const model = document.querySelector('#vahan');
+        const arModel = document.querySelector('#arOnly');
+        const pageModel = document.querySelector('#pageOnly')
         const entryBtn = document.getElementById('myEnterARButton');
         const exitBtn = document.getElementById('myExitARButton');
 
         // store initial transform so we can restore on exit-vr
-        const initPosAttr = model.getAttribute('position') || { x: 0, y: 0, z: -1 };
+        const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
         const initialPosition = new THREE.Vector3(initPosAttr.x, initPosAttr.y, initPosAttr.z);
-        const initialQuaternion = model.object3D.quaternion.clone();
-
-        // show model on normal (non-AR) page load
-        model.setAttribute('visible', 'true');
+        const initialQuaternion = arModel.object3D.quaternion.clone();
 
         // Create a simple white reticle (ring)
         const reticle = document.createElement('a-entity');
@@ -179,11 +201,12 @@
             }
         }
 
+        // Placing the model using the Reticle Data
         function placeModelAtReticle() {
             if (!reticle.getAttribute('visible')) return;
-            model.object3D.position.copy(reticle.object3D.position);
-            model.object3D.quaternion.copy(reticle.object3D.quaternion);
-            model.setAttribute('visible', 'true');
+            arModel.object3D.position.copy(reticle.object3D.position);
+            arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
+            arModel.setAttribute('visible', 'true');
         }
 
         // Enter AR: hide the desktop model and start hit test for placement
@@ -192,7 +215,8 @@
 
             // prepare for AR placement
             placed = false;
-            model.setAttribute('visible', 'false');
+            arModel.setAttribute('visible', 'false');
+            pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
@@ -236,19 +260,18 @@
         // Exit AR: restore desktop behaviour and reset model to initial transform
         scene.addEventListener('exit-vr', () => {
             placed = false;
-            model.setAttribute('visible', 'true');
+            pageModel.setAttribute('visible', 'true');
+            arModel.setAttribute('visible', 'false');
+
             // restore default position & rotation
-            model.object3D.position.copy(initialPosition);
-            model.object3D.quaternion.copy(initialQuaternion);
+            arModel.object3D.position.copy(initialPosition);
+            arModel.object3D.quaternion.copy(initialQuaternion);
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
             stopHitTest();
+
             entryBtn.style.display = 'block'; // hide entry button
             // exitBtn.style.display = 'none'; // show exit button
-            camera.object3D.position.set(0, 0.5, -0.2); // reset camera position
-            camera.object3D.rotation.set(0, 0, 0); // reset camera rotation
-            model.object3D.position.set(0, 0, -1); // reset model position
-            model.object3D.quaternion.set(0, 0, 0, 1); // reset model rotation
         });
     </script>
  </html>
