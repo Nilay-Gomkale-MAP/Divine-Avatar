@@ -26,7 +26,7 @@
             }
 
             /* custom AR button: white fill, black text, bottom-center */
-            #myEnterARButton {
+            #myEnterARButton, #myExitARButton {
                 position: fixed;
                 bottom: 32px;
                 left: 50%;
@@ -44,7 +44,7 @@
                 text-decoration: none;
                 font-family: Arial, Helvetica, sans-serif;
             }
-            #myEnterVRButton:hover{
+            #myEnterVRButton:hover, #myExitARButton:hover{
                 background: #0000ff;
                 color: #ffffff;
             }
@@ -55,87 +55,72 @@
         <!-- Scene Setup Node -->
         <a-scene
             renderer="alpha: true;" 
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local;"
+            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay,unbounded; overlayElement: #myExitARButton;"
             xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
-            ar-hit-test="target:#arOnly; enabled: true;"
-        >
+            ar-hit-test="target:#arOnly; enabled: true;">
 
-        <!-- Importing Animated Model Asset -->
-        <a-assets>
-          <a-asset-item id="ARModel" src="Toy_Dino_animated.glb"></a-asset-item>
-        </a-assets>
+            <!-- Importing Animated Model Asset -->
+            <a-assets>
+            <a-asset-item id="ARModel" src="Toy_Dino_animated.glb"></a-asset-item>
+            </a-assets>
 
-        <!-- Importing Highres Model Asset -->
-        <a-assets>
-            <a-asset-item id="pgModel" src="Toy_Dino_highres.glb"></a-asset-item>
-        </a-assets>
+            <!-- Importing Highres Model Asset -->
+            <a-assets>
+                <a-asset-item id="pgModel" src="Toy_Dino_highres.glb"></a-asset-item>
+            </a-assets>
 
-        <!-- Importing Cancel Icon White Image -->
-        <a-assets>
-            <img id="cancelIconWhite" src="cancel_Icon_white.png">
-        </a-assets>
-
-        <!-- AR Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
-        <a-entity
-          id="arOnly"
-          gltf-model="#ARModel"
-          position="0 0 -1"
-          scale="1.4 1.4 1.4"
-          animation-mixer
-          visible="false"
-        ></a-entity>
-
-        <!-- Web Page only model: No animations and should be set to disappear when changed to AR mode-->
-        <a-entity
-          id="pageOnly"
-          gltf-model="#pgModel"
-          position="0 0 -1"
-          scale="1.4 1.4 1.4"
-        ></a-entity>
-
-        <!-- Custom AR Entry Buttons-->
-        <a id="myEnterARButton" href="#">Click to Start AR</a>
-        
-
-        <!-- LEARNING: 
-        <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
-
-        Need to Use DOM Overlay to create an Exit button: 
-        https://github.com/immersive-web/dom-overlays/blob/master/explainer.md 
-
-        or
-
-        Let's create an new 3D entity which is fixed in the top right corner of the screen,
-        and when clicked, it will exit AR mode.
-        -->
-        
-        <!-- Camera with orbit controls for desktop and non-AR mode -->
-        <a-entity
-          camera
-          look-controls="enabled: false"
-          orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"
-        >
-            <a-image
-            cursor
-            id="myExitARButton"
-            src="#cancelIconWhite"
-            position="0.5 1 -1"
-            scale="0.5 0.5 0.5"
+            <!-- AR Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
+            <a-entity
+            id="arOnly"
+            gltf-model="#ARModel"
+            position="0 0 -1"
+            scale="1.4 1.4 1.4"
+            animation-mixer
             visible="false"
-            ></a-image>
-        </a-entity>
+            ></a-entity>
 
-        <!-- IDEA WHILE TESTING:
-        We can parent a fixed image to the camera like done above to make some creative frames that make enhance the experience, 
-        this way we can take advantage of fixed elements to insert text, clues and more to create an interesting experience
-        -->
+            <!-- Web Page only model: No animations and should be set to disappear when changed to AR mode-->
+            <a-entity
+            id="pageOnly"
+            gltf-model="#pgModel"
+            position="0 0 -1"
+            scale="1.4 1.4 1.4"
+            ></a-entity>
 
-        <!-- Basic lighting -->
-        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-        <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
+            <!-- Custom AR Entry Buttons-->
+            <a id="myEnterARButton" href="#">Click to Start AR</a>
+            <a id="#myExitARButton" href="#" display="none">Exit AR</a>
+            
 
+            <!-- LEARNING: 
+            <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
+
+            Need to Use DOM Overlay to create an Exit button: 
+            https://github.com/immersive-web/dom-overlays/blob/master/explainer.md 
+
+            or
+
+            Let's create an new 3D entity which is fixed in the top right corner of the screen,
+            and when clicked, it will exit AR mode. => Tried and Failed to figure it out as it became tough to reliably place the Exit button in the top right corner
+            -->
+            
+            <!-- Camera with orbit controls for desktop and non-AR mode -->
+            <a-entity
+            camera
+            look-controls="enabled: false"
+            orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"
+            ></a-entity>
+
+            <!-- IDEA WHILE TESTING:
+            We can parent a fixed image to the camera like done above to make some creative frames that make enhance the experience, 
+            this way we can take advantage of fixed elements to insert text, clues and more to create an interesting experience
+            -->
+
+            <!-- Basic lighting -->
+            <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+            <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
         </a-scene>
     </body>
     
@@ -146,7 +131,6 @@
         const arModel = document.querySelector('#arOnly');
         const pageModel = document.querySelector('#pageOnly')
         const entryBtn = document.getElementById('myEnterARButton');
-        const exitBtn = document.getElementById('myExitARButton');
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
@@ -226,7 +210,6 @@
             placed = false;
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
-            exitBtn.setAttribute('visible', 'true');
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
@@ -256,15 +239,6 @@
                 console.warn('Hit test start failed:', err);
             }
             entryBtn.style.display = 'none'; // hide entry button
-            // exitBtn.style.display = 'block'; // show exit button
-        });
-
-        exitBtn.addEventListener('click', async () => {
-                if (scene.is('ar-mode')) {
-                    scene.exitVR();
-                    return;
-                }
-                console.log('Requesting Exit AR');
         });
 
         // Exit AR: restore desktop behaviour and reset model to initial transform
@@ -282,8 +256,7 @@
             camera.setAttribute('initialPosition', '0 0.5 -0.2')
             stopHitTest();
 
-            entryBtn.style.display = 'block'; // hide entry button
-            // exitBtn.style.display = 'none'; // show exit button
+            entryBtn.style.display = 'block'; // Show entry button
         });
     </script>
  </html>
