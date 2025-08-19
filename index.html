@@ -20,16 +20,29 @@
                 height: 100%;
             }
 
-            /* move the A-Frame XR/AR button to bottom center */
-            .a-enter-vr-button,
-            .a-enter-vr-button__button,
-            .a-enter-vr-button button {
-                position: fixed !important;
-                bottom: 20px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                z-index: 9999 !important;
+            /* hide default A-Frame enter-vr button (we use a custom button) */
+            .a-enter-vr-button {
+                display: none !important;
             }
+
+            /* custom AR button: white fill, black text, bottom-center */
+            #custom-ar-button {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ffffff;
+                color: #000000;
+                border: none;
+                padding: 12px 18px;
+                border-radius: 8px;
+                font-size: 16px;
+                z-index: 10000;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                -webkit-tap-highlight-color: transparent;
+            }
+            #custom-ar-button:active { transform: translateX(-50%) translateY(1px); }
         </style>
     </head>
 
@@ -71,6 +84,9 @@
         <!-- Sky background -->
         <!-- <a-sky color="#ECECEC"></a-sky> -->
         </a-scene>
+
+        <!-- custom AR entry button (white fill, black text) -->
+        <button id="custom-ar-button" type="button">Click to Start AR</button>
     </body>
     <script>
         const scene = document.querySelector('a-scene');
@@ -197,5 +213,32 @@
             camera.setAttribute('orbit-controls', 'enabled', true);
             stopHitTest();
         });
+
+        // wire custom AR button to A-Frame enter/exit VR (AR) flow
+        (function () {
+            const customBtn = document.getElementById('custom-ar-button');
+            if (!customBtn) return;
+
+            function updateButtonLabel() {
+                customBtn.textContent = scene.is('ar-mode') ? 'Exit AR' : 'Click to Start AR';
+            }
+
+            customBtn.addEventListener('click', async () => {
+                // if already in AR, exit; otherwise request AR (enter VR)
+                if (scene.is('ar-mode')) {
+                    scene.exitVR();
+                    return;
+                }
+                try {
+                    await scene.enterVR();
+                } catch (err) {
+                    console.warn('Failed to enter AR/VR:', err);
+                }
+            });
+
+            scene.addEventListener('enter-vr', updateButtonLabel);
+            scene.addEventListener('exit-vr', updateButtonLabel);
+            updateButtonLabel();
+        })();
     </script>
 </html>
