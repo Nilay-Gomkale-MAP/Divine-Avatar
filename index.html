@@ -50,12 +50,13 @@
             }
             #exit-ar {
                 position: absolute;
+                font-size: 16px;
                 right: 40px;
                 top: 40px;
                 background: #ffffff;
                 color: #000000;
                 border: 1px solid rgba(255,255,255,0.25);
-                padding: 6px 8px;
+                padding: 8px 12px;
                 font-weight: bold;
             }
         </style>
@@ -228,7 +229,7 @@
             // prepare for AR placement
             placed = false;
             arModel.setAttribute('visible', 'false');
-            // pageModel.setAttribute('visible', 'false');
+            pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
@@ -277,20 +278,22 @@
         // Exit AR: restore desktop behaviour and reset model to initial transform
         scene.addEventListener('exit-vr', () => {
             placed = false;
-            // pageModel.setAttribute('visible', 'true');
+            pageModel.setAttribute('visible', 'true');
             arModel.setAttribute('visible', 'false');
-            exitBtn.setAttribute('visible', 'false');
 
             // restore default position & rotation
             arModel.object3D.position.copy(initialPosition);
             arModel.object3D.quaternion.copy(initialQuaternion);
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
+            pageModel.setAttribute('position', '0 0 -1');
             camera.setAttribute('initialPosition', '0 0.5 -0.2');
+            camera.setAttribute('target', '0 0.25 -1');
             stopHitTest();
 
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none'; //Hide Exit button
+
         });
     </script>
  </html>
