@@ -44,7 +44,7 @@
                 text-decoration: none;
                 font-family: Arial, Helvetica, sans-serif;
             }
-            #myEnterVRButton:hover, #myExitARButton:hover{
+            #myEnterVRButton:hover{
                 background: #0000ff;
                 color: #ffffff;
             }
@@ -55,7 +55,7 @@
         <!-- Scene Setup Node -->
         <a-scene
             renderer="alpha: true;" 
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay,unbounded; overlayElement: #myExitARButton;"
+            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay,unbounded; overlayElement: #overlay;"
             xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
@@ -91,7 +91,7 @@
 
             <!-- Custom AR Entry Buttons-->
             <a id="myEnterARButton" href="#">Click to Start AR</a>
-            <a id="myExitARButton" href="#" display="none">Exit AR</a>
+            <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
             
 
             <!-- LEARNING: 
@@ -131,6 +131,7 @@
         const arModel = document.querySelector('#arOnly');
         const pageModel = document.querySelector('#pageOnly')
         const entryBtn = document.getElementById('myEnterARButton');
+        const exitBtn = document.getElementById('myExitARButton');
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
