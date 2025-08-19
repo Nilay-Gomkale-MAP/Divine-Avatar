@@ -250,25 +250,28 @@
 
             // 🔑 Reliable cleanup when AR session ends
             xrSession.addEventListener('end', () => {
+            // Double defer to ensure framebuffer fully resets
+            requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    placed = false;
-                    pageModel.setAttribute('visible', 'true');
-                    arModel.setAttribute('visible', 'false');
-                    arModel.object3D.position.copy(initialPosition);
-                    arModel.object3D.quaternion.copy(initialQuaternion);
+                placed = false;
+                pageModel.setAttribute('visible', 'true');
+                arModel.setAttribute('visible', 'false');
+                arModel.object3D.position.copy(initialPosition);
+                arModel.object3D.quaternion.copy(initialQuaternion);
 
-                    camera.setAttribute('look-controls', 'enabled', false);
-                    camera.setAttribute('orbit-controls', 'enabled', true);
+                camera.setAttribute('look-controls', 'enabled', false);
+                camera.setAttribute('orbit-controls', 'enabled', true);
 
-                    pageModel.setAttribute('position', '0 0 -1');
-                    pageModel.setAttribute('scale', '1.4 1.4 1.4');
+                pageModel.setAttribute('position', '0 0 -1');
+                pageModel.setAttribute('scale', '1.4 1.4 1.4');
 
-                    entryBtn.style.display = 'block'; // Show Entry button
-                    exitBtn.style.display = 'none';   // Hide Exit button
+                entryBtn.style.display = 'block';
+                exitBtn.style.display = 'none';
 
-                    stopHitTest();
-                    console.log('Restored page model after AR exit');
+                stopHitTest();
+                console.log('✅ Restored page model safely after AR exit');
                 });
+            });
             });
 
             try {
@@ -292,5 +295,6 @@
             });
             }
         });
-    </script>
+        </script>
+
  </html>
