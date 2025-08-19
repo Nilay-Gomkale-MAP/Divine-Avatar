@@ -103,6 +103,7 @@
             gltf-model="#pgModel"
             position="0 0 -1"
             scale="1.4 1.4 1.4"
+            visible="true";
             ></a-entity>
 
             <!-- Custom AR Entry Buttons-->
@@ -227,7 +228,7 @@
             // prepare for AR placement
             placed = false;
             arModel.setAttribute('visible', 'false');
-            pageModel.setAttribute('visible', 'false');
+            // pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
@@ -276,7 +277,7 @@
         // Exit AR: restore desktop behaviour and reset model to initial transform
         scene.addEventListener('exit-vr', () => {
             placed = false;
-            pageModel.setAttribute('visible', 'true');
+            // pageModel.setAttribute('visible', 'true');
             arModel.setAttribute('visible', 'false');
             exitBtn.setAttribute('visible', 'false');
 
