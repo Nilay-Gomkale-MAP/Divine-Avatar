@@ -230,8 +230,8 @@
             placed = false;
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
-            camera.setAttribute('look-controls', 'enabled', true);
-            camera.setAttribute('orbit-controls', 'enabled', false);
+            // camera.setAttribute('look-controls', 'enabled', true);
+            // camera.setAttribute('orbit-controls', 'enabled', false);
 
             xrSession = scene.renderer.xr.getSession();
             if (!xrSession) return;
@@ -284,11 +284,9 @@
             // restore default position & rotation
             arModel.object3D.position.copy(initialPosition);
             arModel.object3D.quaternion.copy(initialQuaternion);
-            camera.setAttribute('look-controls', 'enabled', false);
-            camera.setAttribute('orbit-controls', 'enabled', true);
-            pageModel.setAttribute('position', '0 0 -1');
+            // camera.setAttribute('look-controls', 'enabled', false);
+            // camera.setAttribute('orbit-controls', 'enabled', true);
             camera.setAttribute('initialPosition', '0 0.5 -0.2');
-            camera.setAttribute('target', '0 0.25 -1');
             stopHitTest();
 
             entryBtn.style.display = 'block'; // Show Entry button
