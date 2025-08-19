@@ -28,7 +28,7 @@
             /* custom AR button: white fill, black text, bottom-center */
             #myEnterARButton {
                 position: absolute;
-                bottom: 32px;
+                bottom: 40px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: rgba(127,127,127,0.25);
@@ -52,8 +52,8 @@
                 position: absolute;
                 right: 40px;
                 top: 40px;
-                background: rgba(127,127,127,0.25);
-                color: white;
+                background: #ffffff;
+                color: #000000;
                 border: 1px solid rgba(255,255,255,0.25);
                 padding: 6px 8px;
                 font-weight: bold;
@@ -256,8 +256,8 @@
             } catch (err) {
                 console.warn('Hit test start failed:', err);
             }
-            entryBtn.style.display = 'none'; // hide entry button
-            exitBtn.style.display = 'block';
+            entryBtn.style.display = 'none'; // Hide Entry Button
+            exitBtn.style.display = 'block'; //Show Exit Button
         });
 
         //Code borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
@@ -285,11 +285,11 @@
             arModel.object3D.quaternion.copy(initialQuaternion);
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
-            camera.setAttribute('initialPosition', '0 0.5 -0.2')
+            camera.setAttribute('initialPosition', '0 0.5 -0.2');
             stopHitTest();
 
-            entryBtn.style.display = 'block'; // Show entry button
-            exitBtn.style.display = 'none';
+            entryBtn.style.display = 'block'; // Show Entry button
+            exitBtn.style.display = 'none'; //Hide Exit button
         });
     </script>
  </html>
