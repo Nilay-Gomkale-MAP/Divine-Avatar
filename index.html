@@ -20,29 +20,30 @@
                 height: 100%;
             }
 
-            /* hide default A-Frame enter-vr button (we use a custom button) */
-            .a-enter-vr-button {
-                display: none !important;
+            /* style the A-Frame XR/AR injected button: white fill, black text, bottom-center */
+            .a-enter-vr-button,
+            .a-enter-vr-button__button,
+            .a-enter-vr-button button {
+                position: fixed !important;
+                bottom: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                z-index: 10000 !important;
+                margin: 0 !important;
             }
 
-            /* custom AR button: white fill, black text, bottom-center */
-            #custom-ar-button {
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #ffffff;
-                color: #000000;
-                border: none;
-                padding: 12px 18px;
-                border-radius: 8px;
-                font-size: 16px;
-                z-index: 10000;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-                -webkit-tap-highlight-color: transparent;
+            /* style the actual visible button element */
+            .a-enter-vr-button button,
+            .a-enter-vr-button__button {
+                background: #fff !important;
+                color: #000 !important;
+                border: none !important;
+                padding: 12px 18px !important;
+                border-radius: 8px !important;
+                font-size: 16px !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+                cursor: pointer !important;
             }
-            #custom-ar-button:active { transform: translateX(-50%) translateY(1px); }
         </style>
     </head>
 
@@ -85,10 +86,10 @@
         <!-- <a-sky color="#ECECEC"></a-sky> -->
         </a-scene>
 
-        <!-- custom AR entry button (white fill, black text) -->
-        <button id="custom-ar-button" type="button">Click to Start AR</button>
-    </body>
+        <!-- using A-Frame's xr-mode-ui enter button (styled above) -->
+     </body>
     <script>
+        // keep your existing AR/reticle/hit-test logic here — xr-mode-ui will handle the UI.
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
         const model = document.querySelector('#vahan');
@@ -213,32 +214,5 @@
             camera.setAttribute('orbit-controls', 'enabled', true);
             stopHitTest();
         });
-
-        // wire custom AR button to A-Frame enter/exit VR (AR) flow
-        (function () {
-            const customBtn = document.getElementById('custom-ar-button');
-            if (!customBtn) return;
-
-            function updateButtonLabel() {
-                customBtn.textContent = scene.is('ar-mode') ? 'Exit AR' : 'Click to Start AR';
-            }
-
-            customBtn.addEventListener('click', async () => {
-                // if already in AR, exit; otherwise request AR (enter VR)
-                if (scene.is('ar-mode')) {
-                    scene.exitVR();
-                    return;
-                }
-                try {
-                    await scene.enterVR();
-                } catch (err) {
-                    console.warn('Failed to enter AR/VR:', err);
-                }
-            });
-
-            scene.addEventListener('enter-vr', updateButtonLabel);
-            scene.addEventListener('exit-vr', updateButtonLabel);
-            updateButtonLabel();
-        })();
     </script>
-</html>
+ </html>
