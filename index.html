@@ -5,13 +5,13 @@
         <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
         <style>
-            /* page background: slightly brighter spotlight, ~20% wider radius */
+            /* page background: slightly brighter spotlight, vertically centered, ~20% wider radius */
             body, html {
                 margin: 0;
                 overflow: hidden;
                 height: 100%;
-                /* increased brightness of the inner spot and bumped stop percentages by ~20% */
-                background: radial-gradient(circle at 50% 25%, #4a4a4a 0%, #272727 30%, #000 72%) fixed;
+                /* center the spotlight vertically (50%), keep brighter inner spot and wider radius */
+                background: radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed;
             }
 
             /* let the A-Frame canvas be transparent so the gradient shows through */
