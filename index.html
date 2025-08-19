@@ -144,83 +144,154 @@
     </body>
     
     <script>
-        AFRAME.registerComponent('ar-mode-manager', {
-        init: function () {
-            const sceneEl = this.el;
-            const pageModel = document.querySelector('#pageModel');
-            const arModel = document.querySelector('#arModel');
-            const camera = document.querySelector('#camera');
-            const entryBtn = document.querySelector('#entryBtn');
-            const exitBtn = document.querySelector('#exitBtn');
+        // Query Selectors and initial setup
+        const scene = document.querySelector('a-scene');
+        const camera = scene.querySelector('[camera]');
+        const arModel = document.querySelector('#arOnly');
+        const pageModel = document.querySelector('#pageOnly')
+        const entryBtn = document.getElementById('myEnterARButton');
+        const exitBtn = document.getElementById('exit-ar');
 
-            let placed = false;
-            let initialPosition, initialQuaternion;
+        // store initial transform so we can restore on exit-vr
+        const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
+        const initialPosition = new THREE.Vector3(initPosAttr.x, initPosAttr.y, initPosAttr.z);
+        const initialQuaternion = arModel.object3D.quaternion.clone();
 
-            pageModel.addEventListener('model-loaded', () => {
-            initialPosition = pageModel.object3D.position.clone();
-            initialQuaternion = pageModel.object3D.quaternion.clone();
-            });
+        // Create a simple white reticle (ring)
+        const reticle = document.createElement('a-entity');
+        reticle.setAttribute('id', 'reticle');
+        reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.03; radiusOuter: 0.05;');
+        reticle.setAttribute('material', 'color: #ffffff; shader: flat; opacity: 0.95;');
+        reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
+        reticle.setAttribute('visible', 'false');
+        scene.appendChild(reticle);
 
-            entryBtn.addEventListener('click', () => {
-            sceneEl.renderer.xr.enabled = true;
-            sceneEl.enterVR();
-            console.log("AR entry requested");
-            });
+        // WebXR hit-test variables
+        let xrSession = null;
+        let hitTestSource = null;
+        let localReferenceSpace = null;
+        let placed = false;
+        let onSelectHandler = null;
 
-            exitBtn.addEventListener('click', () => {
-            console.log("Exit AR button pressed");
-            sceneEl.exitVR();
-            });
-
-            sceneEl.addEventListener('enter-vr', () => {
-            if (sceneEl.is('ar-mode')) {
-                pageModel.setAttribute('visible', 'false');
-                arModel.setAttribute('visible', 'true');
-                exitBtn.style.display = 'block';
-                entryBtn.style.display = 'none';
-                placed = false;
-                startHitTest();
-            }
-            });
-
-            sceneEl.addEventListener('exit-vr', () => {
-            const xrSession = sceneEl.renderer.xr.getSession();
-            if (xrSession) {
-                xrSession.addEventListener('end', () => {
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                    placed = false;
-                    pageModel.setAttribute('visible', 'true');
-                    arModel.setAttribute('visible', 'false');
-                    arModel.object3D.position.copy(initialPosition);
-                    arModel.object3D.quaternion.copy(initialQuaternion);
-
-                    camera.setAttribute('look-controls', 'enabled', false);
-                    camera.setAttribute('orbit-controls', 'enabled', true);
-
-                    pageModel.setAttribute('position', '0 0 -1');
-                    pageModel.setAttribute('scale', '1.4 1.4 1.4');
-
-                    entryBtn.style.display = 'block';
-                    exitBtn.style.display = 'none';
-
-                    stopHitTest();
-                    console.log('✅ Restored page model safely after AR exit');
-
-                    // 🔧 Force renderer reset
-                    const rendererSystem = sceneEl.systems.renderer;
-                    if (rendererSystem && rendererSystem.renderer) {
-                        rendererSystem.renderer.xr.setSession(null);
-                        rendererSystem.renderer.setAnimationLoop(null);
-                        rendererSystem.renderer.clear();
-                        console.log("🔄 Renderer reset after AR session");
-                    }
-                    });
-                });
-                });
-            }
-            });
+        async function startHitTest(session) {
+            localReferenceSpace = await session.requestReferenceSpace('local');
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+            session.requestAnimationFrame(onXRFrame);
         }
+
+        function stopHitTest() {
+            if (hitTestSource) {
+                hitTestSource.cancel && hitTestSource.cancel();
+                hitTestSource = null;
+            }
+            localReferenceSpace = null;
+            xrSession = null;
+            reticle.setAttribute('visible', 'false');
+        }
+
+        function onXRFrame(time, xrFrame) {
+            const session = xrFrame.session;
+            session.requestAnimationFrame(onXRFrame);
+
+            if (!hitTestSource || placed) return;
+
+            const hitResults = xrFrame.getHitTestResults(hitTestSource);
+            if (hitResults.length > 0) {
+                const hit = hitResults[0];
+                const pose = hit.getPose(localReferenceSpace);
+                if (pose) {
+                    const pos = pose.transform.position;
+                    const ori = pose.transform.orientation;
+                    reticle.object3D.position.set(pos.x, pos.y, pos.z);
+                    reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
+                    reticle.setAttribute('visible', 'true');
+                } else {
+                    reticle.setAttribute('visible', 'false');
+                }
+            } else {
+                reticle.setAttribute('visible', 'false');
+            }
+        }
+
+        // Placing the model using the Reticle Data
+        function placeModelAtReticle() {
+            if (!reticle.getAttribute('visible')) return;
+            arModel.object3D.position.copy(reticle.object3D.position);
+            arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
+            arModel.setAttribute('visible', 'true');
+        }
+
+        // Enter AR: hide the desktop model and start hit test for placement
+        scene.addEventListener('enter-vr', async () => {
+            if (!scene.is('ar-mode')) return;
+
+            // prepare for AR placement
+            placed = false;
+            arModel.setAttribute('visible', 'false');
+            pageModel.setAttribute('visible', 'false');
+            camera.setAttribute('look-controls', 'enabled', true);
+            camera.setAttribute('orbit-controls', 'enabled', false);
+
+            xrSession = scene.renderer.xr.getSession();
+            if (!xrSession) return;
+
+            // single-use select handler: place once, then stop hit test
+            onSelectHandler = () => {
+                if (placed) return;
+                placeModelAtReticle();
+                placed = true;
+                // cleanup hit test and hide reticle after placement
+                stopHitTest();
+                if (xrSession && onSelectHandler) {
+                    xrSession.removeEventListener('select', onSelectHandler);
+                }
+            };
+            xrSession.addEventListener('select', onSelectHandler);
+
+            xrSession.addEventListener('end', () => {
+                stopHitTest();
+            });
+
+            try {
+                await startHitTest(xrSession);
+            } catch (err) {
+                console.warn('Hit test start failed:', err);
+            }
+            entryBtn.style.display = 'none'; // Hide Entry Button
+            exitBtn.style.display = 'block'; //Show Exit Button
+        });
+
+        //Code borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+        AFRAME.registerComponent('exit-ar-button', {
+            schema: {
+                element: {type: 'selector'}
+            },
+            init: function () {
+            this.data.element.addEventListener('click', ev => {
+                this.el.sceneEl.renderer.xr.getSession().end();
+                console.log('Exit AR');
+            });
+            }
+        });
+
+        // Exit AR: only handle UI here, not model/camera restoration
+        scene.addEventListener('exit-vr', () => {
+            placed = false;
+            pageModel.setAttribute('visible', 'true');
+            arModel.setAttribute('visible', 'false');
+            arModel.object3D.position.copy(initialPosition);
+            arModel.object3D.quaternion.copy(initialQuaternion);
+            camera.setAttribute('look-controls', 'enabled', false);
+            camera.setAttribute('orbit-controls', 'enabled', true);
+            pageModel.setAttribute('position', '0 0 -1');
+            pageModel.setAttribute('scale', '1.4 1.4 1.4');
+            pageModel.setAttribute('visible', 'true');
+            entryBtn.style.display = 'block'; // Show Entry button
+            exitBtn.style.display = 'none';   // Hide Exit button
+            stopHitTest();
+            console.log('pageModel visible:', pageModel.getAttribute('visible'));
+            console.log('pageModel position:', pageModel.getAttribute('position'));
         });
     </script>
  </html>
