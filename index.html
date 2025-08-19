@@ -299,6 +299,16 @@
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none'; //Hide Exit button
 
+            // --- ADD THIS BLOCK ---
+            // Force renderer to resize and reset after XR session ends
+            setTimeout(() => {
+                if (scene.renderer) {
+                    scene.renderer.setSize(window.innerWidth, window.innerHeight);
+                    scene.renderer.setPixelRatio(window.devicePixelRatio);
+                }
+                scene.resize();
+            }, 100);
+            // --- END BLOCK ---
         });
     </script>
  </html>
