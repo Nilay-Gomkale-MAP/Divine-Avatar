@@ -75,10 +75,17 @@
           visible="false"
         ></a-entity>
 
+        <!-- Custom AR Entry and Exit Buttons-->
         <a id="myEnterARButton" href="#">Click to Start AR</a>
-        <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
         
 
+        <!-- LEARNING: 
+        <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
+
+        Need to Use DOM Overlay to create an Exit button: 
+        https://github.com/immersive-web/dom-overlays/blob/master/explainer.md 
+        -->
+        
         <!-- Camera with orbit controls for desktop and non-AR mode -->
         <a-entity
           camera
@@ -209,7 +216,7 @@
                 console.warn('Hit test start failed:', err);
             }
             entryBtn.style.display = 'none'; // hide entry button
-            exitBtn.style.display = 'block'; // show exit button
+            // exitBtn.style.display = 'block'; // show exit button
         });
 
         exitBtn.addEventListener('click', async () => {
@@ -231,7 +238,7 @@
             camera.setAttribute('orbit-controls', 'enabled', true);
             stopHitTest();
             entryBtn.style.display = 'block'; // hide entry button
-            exitBtn.style.display = 'none'; // show exit button
+            // exitBtn.style.display = 'none'; // show exit button
             camera.object3D.position.set(0, 0.5, -0.2); // reset camera position
             camera.object3D.rotation.set(0, 0, 0); // reset camera rotation
             model.object3D.position.set(0, 0, -1); // reset model position
