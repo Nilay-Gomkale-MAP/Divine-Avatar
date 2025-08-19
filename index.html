@@ -287,12 +287,11 @@
         if (scene.renderer && scene.renderer.xr) {
             scene.renderer.xr.addEventListener('sessionend', () => {
                 setTimeout(() => {
-                    // Restore renderer
+                    // Restore renderer and model/camera as before
                     scene.renderer.setSize(window.innerWidth, window.innerHeight);
                     scene.renderer.setPixelRatio(window.devicePixelRatio);
                     scene.resize();
 
-                    // Restore desktop model and camera
                     placed = false;
                     pageModel.setAttribute('visible', 'true');
                     arModel.setAttribute('visible', 'false');
@@ -305,7 +304,10 @@
                     pageModel.setAttribute('visible', 'true');
                     console.log('pageModel visible:', pageModel.getAttribute('visible'));
                     console.log('pageModel position:', pageModel.getAttribute('position'));
-                }, 100);
+
+                    // --- Add this as a last resort ---
+                    window.location.reload();
+                }, 200);
             });
         }
     </script>
