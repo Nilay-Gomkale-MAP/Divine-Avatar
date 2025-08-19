@@ -26,8 +26,8 @@
             }
 
             /* custom AR button: white fill, black text, bottom-center */
-            #myEnterARButton, #myExitARButton {
-                position: fixed;
+            #myEnterARButton {
+                position: absolute;
                 bottom: 32px;
                 left: 50%;
                 transform: translateX(-50%);
@@ -48,14 +48,33 @@
                 background: #0000ff;
                 color: #ffffff;
             }
+            #exit-ar {
+                position: absolute;
+                right: 40px;
+                top: 40px;
+                background: rgba(127,127,127,0.25);
+                color: white;
+                border: 1px solid rgba(255,255,255,0.25);
+                padding: 6px 8px;
+                font-weight: bold;
+            }
         </style>
     </head>
 
     <body>
+
+        <!-- Overlay Section -->
+        <div id="overlay">
+            <span id="greeting">
+              Hi, I'm the DOM Overlay
+            </span>
+            <button id="exit-ar">Exit AR</button>
+          </div>
+
         <!-- Scene Setup Node -->
         <a-scene
             renderer="alpha: true;" 
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #myExitARButton;"
+            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
             xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
@@ -90,8 +109,8 @@
             ></a-entity>
 
             <!-- Custom AR Entry Buttons-->
-            <a id="myEnterARButton" href="#">Click to Start AR</a>
-            <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
+            <a-entity id="myEnterARButton" href="#">Click to Start AR</a>
+            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
             
 
             <!-- LEARNING: 
@@ -127,12 +146,10 @@
     <script>
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
-        const bodyBG = document.querySelector('body');
         const camera = scene.querySelector('[camera]');
         const arModel = document.querySelector('#arOnly');
         const pageModel = document.querySelector('#pageOnly')
         const entryBtn = document.getElementById('myEnterARButton');
-        const exitBtn = document.getElementById('myExitARButton');
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
@@ -210,7 +227,6 @@
 
             // prepare for AR placement
             placed = false;
-            document.body.style.background = 'transparent';
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
@@ -242,6 +258,18 @@
                 console.warn('Hit test start failed:', err);
             }
             entryBtn.style.display = 'none'; // hide entry button
+        });
+
+        //Code borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+        AFRAME.registerComponent('exit-ar-button', {
+            schema: {
+                element: {type: 'selector'}
+            },
+            init: function () {
+            this.data.element.addEventListener('click', ev => {
+                this.el.sceneEl.renderer.xr.getSession().end();
+            });
+            }
         });
 
         // Exit AR: restore desktop behaviour and reset model to initial transform
