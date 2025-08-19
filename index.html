@@ -31,11 +31,11 @@
                 bottom: 32px;
                 left: 50%;
                 transform: translateX(-50%);
-                background: #ffffff;
-                color: #000000;
-                border: none;
+                background: rgba(127,127,127,0.25);
+                color: #ffffff;
+                border: 1px solid rgba(255,255,255,0.25);
                 padding: 16px 24px;
-                border-radius: 4px;
+                /* border-radius: 4px; */
                 font-size: 16px;
                 z-index: 10000;
                 cursor: pointer;
@@ -65,11 +65,8 @@
 
         <!-- Overlay Section -->
         <div id="overlay">
-            <span id="greeting">
-              Hi, I'm the DOM Overlay
-            </span>
-            <button id="exit-ar">Exit AR</button>
-          </div>
+            <button id="exit-ar" style="display: none;">Exit AR</button>
+        </div>
 
         <!-- Scene Setup Node -->
         <a-scene
@@ -117,7 +114,8 @@
             <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
 
             Need to Use DOM Overlay to create an Exit button: 
-            https://github.com/immersive-web/dom-overlays/blob/master/explainer.md 
+            https://github.com/immersive-web/dom-overlays/blob/master/explainer.md => 
+            This worked and found a better guide: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
 
             or
 
@@ -150,6 +148,7 @@
         const arModel = document.querySelector('#arOnly');
         const pageModel = document.querySelector('#pageOnly')
         const entryBtn = document.getElementById('myEnterARButton');
+        const exitBtn = document.getElementById('exit-ar');
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
@@ -258,6 +257,7 @@
                 console.warn('Hit test start failed:', err);
             }
             entryBtn.style.display = 'none'; // hide entry button
+            exitBtn.style.display = 'block';
         });
 
         //Code borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
@@ -268,6 +268,7 @@
             init: function () {
             this.data.element.addEventListener('click', ev => {
                 this.el.sceneEl.renderer.xr.getSession().end();
+                console.log('Exit AR');
             });
             }
         });
@@ -288,6 +289,7 @@
             stopHitTest();
 
             entryBtn.style.display = 'block'; // Show entry button
+            exitBtn.style.display = 'none';
         });
     </script>
  </html>
