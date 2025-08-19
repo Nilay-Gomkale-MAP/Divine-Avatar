@@ -108,7 +108,7 @@
             ></a-entity>
 
             <!-- Custom AR Entry Buttons-->
-            <a-entity id="myEnterARButton" href="#">Click to Start AR</a>
+            <a-entity id="myEnterARButton" href="#">Click to Start AR</a-entity>
             <a-entity exit-ar-button="element: #exit-ar"></a-entity>
             
 
@@ -230,8 +230,8 @@
             placed = false;
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
-            // camera.setAttribute('look-controls', 'enabled', true);
-            // camera.setAttribute('orbit-controls', 'enabled', false);
+            camera.setAttribute('look-controls', 'enabled', true);
+            camera.setAttribute('orbit-controls', 'enabled', false);
 
             xrSession = scene.renderer.xr.getSession();
             if (!xrSession) return;
@@ -284,9 +284,16 @@
             // restore default position & rotation
             arModel.object3D.position.copy(initialPosition);
             arModel.object3D.quaternion.copy(initialQuaternion);
-            // camera.setAttribute('look-controls', 'enabled', false);
-            // camera.setAttribute('orbit-controls', 'enabled', true);
-            camera.setAttribute('initialPosition', '0 0.5 -0.2');
+            camera.setAttribute('look-controls', 'enabled', false);
+            camera.setAttribute('orbit-controls', 'enabled', true);
+
+            // Ensure page model is reset and visible
+            pageModel.setAttribute('position', '0 0 -1');
+            pageModel.setAttribute('scale', '1.4 1.4 1.4');
+            pageModel.setAttribute('visible', 'true');
+            console.log('pageModel visible:', pageModel.getAttribute('visible'));
+            console.log('pageModel position:', pageModel.getAttribute('position'));
+
             stopHitTest();
 
             entryBtn.style.display = 'block'; // Show Entry button
