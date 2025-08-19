@@ -55,7 +55,7 @@
         <!-- Scene Setup Node -->
         <a-scene
             renderer="alpha: true;" 
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local;"
+            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #myExitARButton;"
             xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
@@ -127,6 +127,7 @@
     <script>
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
+        const bodyBG = document.querySelector('body');
         const camera = scene.querySelector('[camera]');
         const arModel = document.querySelector('#arOnly');
         const pageModel = document.querySelector('#pageOnly')
@@ -209,6 +210,7 @@
 
             // prepare for AR placement
             placed = false;
+            document.body.style.backgroundColor = 'transparent';
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
