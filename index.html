@@ -25,7 +25,7 @@
                 display: none !important;
             }
 
-            /* custom AR button: white fill, black text, bottom-center */
+            /* custom AR Entry button: white fill, black text, bottom-center */
             #myEnterARButton {
                 position: absolute;
                 bottom: 40px;
@@ -48,6 +48,8 @@
                 background: #0000ff;
                 color: #ffffff;
             }
+
+            /* custom AR Exit button: white fill, black text, top-right */
             #exit-ar {
                 position: absolute;
                 font-size: 16px;
@@ -275,7 +277,7 @@
             }
         });
 
-        // Exit AR: only handle UI here, not model/camera restoration
+        // Exit AR: restore the page model and reset camera controls
         scene.addEventListener('exit-vr', () => {
             placed = false;
             pageModel.setAttribute('visible', 'true');
