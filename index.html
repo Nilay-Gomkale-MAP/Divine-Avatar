@@ -328,19 +328,26 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
 
         // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
         if (isIOS()) {
-            // NOTE: place Toy_Dino_highres.usdz next to index.html or provide an absolute URL
             const usdHref = 'Toy_Dino_animated_ios_support.usdz';
 
-            // create a Quick Look anchor
+            // create a button element (works for both web and native bridge)
             const ql = document.createElement('a');
             ql.id = 'quicklookButton';
             ql.setAttribute('rel', 'ar');
             ql.setAttribute('href', usdHref);
-            // ql.setAttribute('target', '_blank'); // opens Quick Look
-            ql.textContent = 'View in AR (iOS Quick Look)';
+            ql.textContent = 'View in AR (iOS)';
 
-            // Optional: quick HEAD check so users don't hit a 404 page
+            // When clicked: if native app bridge exists, call it. Otherwise let rel="ar" open Quick Look.
             ql.addEventListener('click', async (ev) => {
+                // if running inside native iOS WKWebView with message handler
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAR) {
+                    ev.preventDefault();
+                    // send the USDZ URL (can be absolute HTTPS or bundled in app)
+                    window.webkit.messageHandlers.openAR.postMessage({ url: usdHref });
+                    return;
+                }
+
+                // Optional HEAD check for web Quick Look cases
                 try {
                     const res = await fetch(usdHref, { method: 'HEAD' });
                     if (!res.ok) {
