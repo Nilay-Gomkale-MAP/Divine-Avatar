@@ -76,9 +76,6 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
     <!-- Overlay Section -->
     <div id="overlay">
         <button id="exit-ar" style="display: none;">Exit AR</button>
-
-        <!-- DOM enter AR button (replace the a-entity below) -->
-        <button id="myEnterARButton" style="display: none;">Click to Start AR</button>
     </div>
 
     <!-- Scene Setup Node -->
@@ -120,7 +117,8 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
         ></a-entity>
 
         <!-- Custom AR Entry Buttons-->
-        <a-entity exit-ar-button="element: #exit-ar"></a-entity>
+            <a-entity id="myEnterARButton" href="#">Click to Start AR</a-entity>
+            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
         
         <!-- LEARNING: 
         <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
