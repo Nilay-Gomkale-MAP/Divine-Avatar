@@ -346,21 +346,7 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
                     window.webkit.messageHandlers.openAR.postMessage({ url: usdHref });
                     return;
                 }
-
-                // Optional HEAD check for web Quick Look cases
-                try {
-                    const res = await fetch(usdHref, { method: 'HEAD' });
-                    if (!res.ok) {
-                        ev.preventDefault();
-                        alert('USDZ file not available. Check hosting and MIME type (model/vnd.usdz+zip).');
-                    }
-                    // allow default navigation to proceed if OK (no target -> Quick Look opens in-place)
-                } catch (err) {
-                    ev.preventDefault();
-                    alert('Unable to reach USDZ file. Serve it over HTTPS and set correct Content-Type.');
-                }
             });
-
             document.body.appendChild(ql);
 
             // Hide the A-Frame entry UI while Quick Look flow is shown
