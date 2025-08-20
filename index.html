@@ -152,6 +152,7 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
         </a-scene>
     </body>
     
+    <!-- SCRIPT -->
     <script>
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
@@ -293,14 +294,13 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
             arModel.object3D.quaternion.copy(initialQuaternion);
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
+            
             pageModel.setAttribute('position', '0 0 -1');
             pageModel.setAttribute('scale', '1.4 1.4 1.4');
             pageModel.setAttribute('visible', 'true');
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
             stopHitTest();
-            console.log('pageModel visible:', pageModel.getAttribute('visible'));
-            console.log('pageModel position:', pageModel.getAttribute('position'));
         });
     </script>
  </html>
