@@ -336,27 +336,39 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
             ql.id = 'quicklookButton';
             ql.setAttribute('rel', 'ar');
             ql.setAttribute('href', usdHref);
-            ql.setAttribute('target', '_blank'); // opens Quick Look
+            // ql.setAttribute('target', '_blank'); // opens Quick Look
             ql.textContent = 'View in AR (iOS Quick Look)';
 
-            // optional: add preview image inside the anchor (put Toy_Dino_highres_preview.png in same folder)
-            // const preview = document.createElement('img');
-            // preview.src = 'Toy_Dino_highres_preview.png';
-            // preview.alt = 'Tap to view in AR';
-            // preview.style.maxWidth = '120px';
-            // preview.style.display = 'block';
-            // preview.style.marginBottom = '6px';
-            // ql.prepend(preview);
+            // Optional: quick HEAD check so users don't hit a 404 page
+            ql.addEventListener('click', async (ev) => {
+                try {
+                    const res = await fetch(usdHref, { method: 'HEAD' });
+                    if (!res.ok) {
+                        ev.preventDefault();
+                        alert('USDZ file not available. Check hosting and MIME type (model/vnd.usdz+zip).');
+                    }
+                    // allow default navigation to proceed if OK (no target -> Quick Look opens in-place)
+                } catch (err) {
+                    ev.preventDefault();
+                    alert('Unable to reach USDZ file. Serve it over HTTPS and set correct Content-Type.');
+                }
+            });
 
             document.body.appendChild(ql);
 
-            // hide the A-Frame custom 3D entry and the HTML entryBtn if present
+            // Hide the A-Frame entry UI while Quick Look flow is shown
             if (entryBtn) entryBtn.style.display = 'none';
             const aframeEntry = document.getElementById('myEnterARButton');
             if (aframeEntry) aframeEntry.setAttribute('visible', 'false');
-
-            // ensure exit button not shown for Quick Look flow
             exitBtn.style.display = 'none';
+
+            // Detect when user returns from Quick Look (page becomes visible again)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // restore UI if needed
+                    if (entryBtn) entryBtn.style.display = 'block';
+                }
+            });
         }
     </script>
 </html>
