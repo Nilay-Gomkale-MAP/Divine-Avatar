@@ -237,6 +237,7 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
 
             // prepare for AR placement
             placed = false;
+            document.body.style.background = 'transparent'; // make background transparent in AR
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
@@ -287,6 +288,7 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
         // Exit AR: restore the page model and reset camera controls
         scene.addEventListener('exit-vr', () => {
             placed = false;
+            document.body.style.background = 'radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed'; // restore background
             pageModel.setAttribute('visible', 'true');
             arModel.setAttribute('visible', 'false');
             arModel.object3D.position.copy(initialPosition);
