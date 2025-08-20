@@ -5,66 +5,295 @@
         <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
         <style>
-            body, html, canvas { margin: 0; overflow: hidden; height: 100%; background-color: transparent !important;}
-            
+            /* page background: slightly brighter spotlight, vertically centered, ~20% wider radius */
+            body, html {
+                margin: 0;
+                overflow: hidden;
+                height: 100%;
+                /* center the spotlight vertically (50%), keep brighter inner spot and wider radius */
+                background: radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed;
+            }
+
+            /* let the A-Frame canvas be transparent so the gradient shows through */
+            canvas {
+                background: transparent !important;
+                height: 100%;
+            }
+
+            /* hide default A-Frame enter-vr button (we use a custom button) */
+            .a-enter-vr-button {
+                display: none !important;
+            }
+
+            /* custom AR Entry button: white fill, black text, bottom-center */
+            #myEnterARButton {
+                position: absolute;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(127,127,127,0.25);
+                color: #ffffff;
+                border: 1px solid rgba(255,255,255,0.25);
+                padding: 16px 24px;
+                /* border-radius: 4px; */
+                font-size: 16px;
+                z-index: 10000;
+                cursor: pointer;
+                /* box-shadow: 0 4px 12px rgba(0,0,0,0.25); */
+                -webkit-tap-highlight-color: transparent;
+                text-decoration: none;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            #myEnterVRButton:hover{
+                background: #0000ff;
+                color: #ffffff;
+            }
+
+            /* custom AR Exit button: white fill, black text, top-right */
+            #exit-ar {
+                position: absolute;
+                font-size: 16px;
+                right: 40px;
+                top: 40px;
+                background: #ffffff;
+                color: #000000;
+                border: 1px solid rgba(255,255,255,0.25);
+                padding: 8px 12px;
+                font-weight: bold;
+            }
         </style>
     </head>
 
     <body>
+
+        <!-- Overlay Section -->
+        <div id="overlay">
+            <button id="exit-ar" style="display: none;">Exit AR</button>
+        </div>
+
+        <!-- Scene Setup Node -->
         <a-scene
             renderer="alpha: true;" 
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local;"
-            xr-mode-ui="enabled: true; XRMode: ar"
+            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
+            xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #myEnterARButton; exitARButton: #myExitARButton;"
             vr-mode-ui="enabled: false"
             style="background: transparent;"
-        >
-        <a-assets>
-        <a-asset-item id="vahanModel" src="/vahan_model.glb"></a-asset-item>
-        </a-assets>
+            ar-hit-test="target:#arOnly; enabled: true;">
 
-        <!-- Model entity with animation mixer -->
-        <a-entity
-        id="vahan"
-        gltf-model="#vahanModel"
-        position="0 0 -1"
-        scale="1 1 1"
-        animation-mixer
-        visible="true"
-        ></a-entity>
+            <!-- Importing Animated Model Asset -->
+            <a-assets>
+            <a-asset-item id="ARModel" src="Toy_Dino_animated.glb"></a-asset-item>
+            </a-assets>
 
-        <!-- Camera with orbit controls for desktop and non-AR mode -->
-        <a-entity 
-        camera 
-        look-controls="enabled: false"
-        orbit-controls="target: 0 0 -1; enableZoom: true; enablePan: false; initialPosition: 0 0 1; rotateSpeed=10"
-        ></a-entity>
+            <!-- Importing Highres Model Asset -->
+            <a-assets>
+                <a-asset-item id="pgModel" src="Toy_Dino_highres.glb"></a-asset-item>
+            </a-assets>
 
-        <!-- Basic lighting -->
-        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-        <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
+            <!-- AR Model entity: start invisible so ar-hit-test can place/show it w/ Animation Mixer-->
+            <a-entity
+            id="arOnly"
+            gltf-model="#ARModel"
+            position="0 0 -1"
+            scale="1.4 1.4 1.4"
+            animation-mixer
+            visible="false"
+            ></a-entity>
 
-        <!-- Sky background -->
-        <!-- <a-sky color="#ECECEC"></a-sky> -->
+            <!-- Web Page only model: No animations and should be set to disappear when changed to AR mode-->
+            <a-entity
+            id="pageOnly"
+            gltf-model="#pgModel"
+            position="0 0 -1"
+            scale="1.4 1.4 1.4"
+            visible="true";
+            ></a-entity>
+
+            <!-- Custom AR Entry Buttons-->
+            <a-entity id="myEnterARButton" href="#">Click to Start AR</a-entity>
+            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
+            
+
+            <!-- LEARNING: 
+            <a id="myExitARButton" href="#" style="display: none;">Exit AR Mode</a>
+
+            Need to Use DOM Overlay to create an Exit button: 
+            https://github.com/immersive-web/dom-overlays/blob/master/explainer.md => 
+            This worked and found a better guide: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+
+            or
+
+            Let's create an new 3D entity which is fixed in the top right corner of the screen,
+            and when clicked, it will exit AR mode. => Tried and Failed to figure it out as it became tough to reliably place the Exit button in the top right corner
+            -->
+            
+            <!-- Camera with orbit controls for desktop and non-AR mode -->
+            <a-entity
+            camera
+            look-controls="enabled: false"
+            orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"
+            ></a-entity>
+
+            <!-- IDEA WHILE TESTING:
+            We can parent a fixed image to the camera like done above to make some creative frames that make enhance the experience, 
+            this way we can take advantage of fixed elements to insert text, clues and more to create an interesting experience
+            -->
+
+            <!-- Basic lighting -->
+            <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+            <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
         </a-scene>
     </body>
+    
     <script>
+        // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
+        const arModel = document.querySelector('#arOnly');
+        const pageModel = document.querySelector('#pageOnly')
+        const entryBtn = document.getElementById('myEnterARButton');
+        const exitBtn = document.getElementById('exit-ar');
 
-        scene.addEventListener('enter-vr', () => {
-            if (scene.is('ar-mode')) {
-            // In AR mode: enable look-controls (device pose)
+        // store initial transform so we can restore on exit-vr
+        const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
+        const initialPosition = new THREE.Vector3(initPosAttr.x, initPosAttr.y, initPosAttr.z);
+        const initialQuaternion = arModel.object3D.quaternion.clone();
+
+        // Create a simple white reticle (ring)
+        const reticle = document.createElement('a-entity');
+        reticle.setAttribute('id', 'reticle');
+        reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.03; radiusOuter: 0.05;');
+        reticle.setAttribute('material', 'color: #ffffff; shader: flat; opacity: 0.95;');
+        reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
+        reticle.setAttribute('visible', 'false');
+        scene.appendChild(reticle);
+
+        // WebXR hit-test variables
+        let xrSession = null;
+        let hitTestSource = null;
+        let localReferenceSpace = null;
+        let placed = false;
+        let onSelectHandler = null;
+
+        async function startHitTest(session) {
+            localReferenceSpace = await session.requestReferenceSpace('local');
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+            session.requestAnimationFrame(onXRFrame);
+        }
+
+        function stopHitTest() {
+            if (hitTestSource) {
+                hitTestSource.cancel && hitTestSource.cancel();
+                hitTestSource = null;
+            }
+            localReferenceSpace = null;
+            xrSession = null;
+            reticle.setAttribute('visible', 'false');
+        }
+
+        function onXRFrame(time, xrFrame) {
+            const session = xrFrame.session;
+            session.requestAnimationFrame(onXRFrame);
+
+            if (!hitTestSource || placed) return;
+
+            const hitResults = xrFrame.getHitTestResults(hitTestSource);
+            if (hitResults.length > 0) {
+                const hit = hitResults[0];
+                const pose = hit.getPose(localReferenceSpace);
+                if (pose) {
+                    const pos = pose.transform.position;
+                    const ori = pose.transform.orientation;
+                    reticle.object3D.position.set(pos.x, pos.y, pos.z);
+                    reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
+                    reticle.setAttribute('visible', 'true');
+                } else {
+                    reticle.setAttribute('visible', 'false');
+                }
+            } else {
+                reticle.setAttribute('visible', 'false');
+            }
+        }
+
+        // Placing the model using the Reticle Data
+        function placeModelAtReticle() {
+            if (!reticle.getAttribute('visible')) return;
+            arModel.object3D.position.copy(reticle.object3D.position);
+            arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
+            arModel.setAttribute('visible', 'true');
+        }
+
+        // Enter AR: hide the desktop model and start hit test for placement
+        scene.addEventListener('enter-vr', async () => {
+            if (!scene.is('ar-mode')) return;
+
+            // prepare for AR placement
+            placed = false;
+            arModel.setAttribute('visible', 'false');
+            pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
-            // Disable orbit-controls
             camera.setAttribute('orbit-controls', 'enabled', false);
+
+            xrSession = scene.renderer.xr.getSession();
+            if (!xrSession) return;
+
+            // single-use select handler: place once, then stop hit test
+            onSelectHandler = () => {
+                if (placed) return;
+                placeModelAtReticle();
+                placed = true;
+                // cleanup hit test and hide reticle after placement
+                stopHitTest();
+                if (xrSession && onSelectHandler) {
+                    xrSession.removeEventListener('select', onSelectHandler);
+                }
+            };
+            xrSession.addEventListener('select', onSelectHandler);
+
+            xrSession.addEventListener('end', () => {
+                stopHitTest();
+            });
+
+            try {
+                await startHitTest(xrSession);
+            } catch (err) {
+                console.warn('Hit test start failed:', err);
+            }
+            entryBtn.style.display = 'none'; // Hide Entry Button
+            exitBtn.style.display = 'block'; //Show Exit Button
+        });
+
+        //Code for exit AR borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+        AFRAME.registerComponent('exit-ar-button', {
+            schema: {
+                element: {type: 'selector'}
+            },
+            init: function () {
+            this.data.element.addEventListener('click', ev => {
+                this.el.sceneEl.renderer.xr.getSession().end();
+                console.log('Exit AR');
+            });
             }
         });
 
+        // Exit AR: restore the page model and reset camera controls
         scene.addEventListener('exit-vr', () => {
-            // Outside AR mode: disable look-controls (so orbit-controls work better)
+            placed = false;
+            pageModel.setAttribute('visible', 'true');
+            arModel.setAttribute('visible', 'false');
+            arModel.object3D.position.copy(initialPosition);
+            arModel.object3D.quaternion.copy(initialQuaternion);
             camera.setAttribute('look-controls', 'enabled', false);
-            // Enable orbit-controls
             camera.setAttribute('orbit-controls', 'enabled', true);
+            pageModel.setAttribute('position', '0 0 -1');
+            pageModel.setAttribute('scale', '1.4 1.4 1.4');
+            pageModel.setAttribute('visible', 'true');
+            entryBtn.style.display = 'block'; // Show Entry button
+            exitBtn.style.display = 'none';   // Hide Exit button
+            stopHitTest();
+            console.log('pageModel visible:', pageModel.getAttribute('visible'));
+            console.log('pageModel position:', pageModel.getAttribute('position'));
         });
     </script>
-</html>
+ </html>
