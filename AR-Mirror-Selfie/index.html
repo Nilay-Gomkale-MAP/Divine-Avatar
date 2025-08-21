@@ -1,0 +1,211 @@
+<!-- INTRODUCTION:
+This is a simple A-Frame (https://aframe.io/) AR scene that allows users to view...
+
+This code is a modified version of the A-Frame boilerplate template, with additional features for AR mode and custom UI elements.
+Github Copilot has been used to assist in writing this code, particularly for the AR functionality and UI elements.
+-->
+
+<!-- PROBLEM:
+AR mode buttons are not working on IOS device, on both Safari and Chrome browsers. It works fine on Android devices, however,
+there does seem to be a framebuffer issure, where the high res model is not visible once we exit from AR mode.
+
+I have posted this issue on the A-Frame GitHub repository: https://github.com/aframevr/aframe/issues/5754
+
+SOLUTION:
+From the github issue, it seems that the A-Frame AR mode is not fully supported on iOS devices due to limitations in the WebXR API.
+Instead, we can use the native iOS Quick Look feature to support AR on iOS devices.
+This involves creating a USDZ file and using a custom button to trigger the Quick Look experience.
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
+        <style>
+            /* page background: A spotlight gradient behind the model - this will change when we skin the UI as the model will be hidden from the webpage and only be visible in AR mode */
+            body, html {
+                margin: 0;
+                overflow: hidden;
+                height: 100%;
+                /* center the spotlight vertically (50%), keep brighter inner spot and wider radius */
+                background: radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed;
+            }
+
+            /* let the A-Frame canvas be transparent so the gradient shows through */
+            canvas {
+                background: transparent !important;
+                height: 100%;
+            }
+
+            /* hide default A-Frame enter-vr button (we use a custom button) */
+            .a-enter-vr-button {
+                display: none !important;
+            }
+
+            /* custom AR Entry button: white fill, black text, bottom-center */
+            #enter-ar, #quicklookButton {
+                position: absolute;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(127,127,127,0.25);
+                color: #ffffff;
+                border: 1px solid rgba(255,255,255,0.25);
+                padding: 16px 24px;
+                /* border-radius: 4px; */
+                font-size: 16px;
+                z-index: 10000;
+                cursor: pointer;
+                /* box-shadow: 0 4px 12px rgba(0,0,0,0.25); */
+                -webkit-tap-highlight-color: transparent;
+                text-decoration: none;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            #enter-ar:hover, #quicklookButton:hover {
+                background: #0000ff;
+                color: #ffffff;
+            }
+
+            /* custom AR Exit button: white fill, black text, top-right */
+            #exit-ar {
+                position: absolute;
+                font-size: 16px;
+                right: 40px;
+                top: 40px;
+                background: #ffffff;
+                color: #000000;
+                border: 1px solid rgba(255,255,255,0.25);
+                padding: 8px 12px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <!-- Overlay Section for Exit AR button in Android -->
+        <div id="overlay">
+            <button id="exit-ar" style="display: none;">Exit AR</button>
+        </div>
+
+        <!-- Importing Cutout Image -->
+        <a-assets>
+            <img id="cutout" src="Cutout.png">
+        </a-assets>
+
+        <!-- Scene Setup Tag -->
+        <a-scene
+            renderer="alpha: true;" 
+            webxr="mode: ar; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
+            xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar; exitARButton: #exit-ar;"
+            vr-mode-ui="enabled: false"
+            style="background: transparent;">
+
+            <!-- Custom AR Entry Buttons-->
+            <a-entity id="enter-ar">Click to Start AR</a-entity>
+            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
+            
+            <!-- Insert a plane with the image cutout as a child entity here -->
+            <a-entity
+            camera
+            look-controls="enabled: false"
+            >
+                <a-image
+                id="cutoutPlane"
+                src="#cutout"
+                position="0 0 -1"
+                scale="1 1 1"
+                visible="false"
+                ></a-image>
+            </a-entity>
+
+            <!-- Basic lighting -->
+            <!-- <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+            <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity> -->
+        </a-scene>
+    </body>
+    
+    <!-- SCRIPT -->
+    <script>
+        // Query Selectors and initial setup
+        const scene = document.querySelector('a-scene');
+        const camera = scene.querySelector('[camera]');
+        const cutout = document.querySelector('#cutoutPlane');
+        const entryBtn = document.getElementById('enter-ar');
+        const exitBtn = document.getElementById('exit-ar');
+
+        // Enter AR: hide the desktop model and start hit test for placement
+        scene.addEventListener('enter-vr', async () => {
+            if (!scene.is('ar-mode')) return;
+            cutout.setAttribute('visible', 'true'); // Show the cutout image
+            entryBtn.style.display = 'none'; // Hide Entry Button
+            exitBtn.style.display = 'block'; //Show Exit Button
+        });
+
+        //Code for exit AR borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+        AFRAME.registerComponent('exit-ar-button', {
+            schema: {
+                element: {type: 'selector'}
+            },
+            init: function () {
+            this.data.element.addEventListener('click', ev => {
+                this.el.sceneEl.renderer.xr.getSession().end();
+                console.log('Exit AR');
+            });
+            }
+        });
+
+        // Exit AR: restore the page model and reset camera controls
+        scene.addEventListener('exit-vr', () => {
+            cutout.setAttribute('visible', 'false'); // Hide the cutout image
+            entryBtn.style.display = 'block'; // Show Entry button
+            exitBtn.style.display = 'none';   // Hide Exit button
+        });
+
+        // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
+        if (isIOS()) {
+            const usdHref = 'Toy_Dino_highres_ios_support_scaledup.usdz'; // USDZ file path
+
+            // create a button element (works for both web and native bridge)
+            const ql = document.createElement('a');
+            ql.id = 'quicklookButton';
+            ql.setAttribute('rel', 'ar');
+            ql.setAttribute('href', usdHref);
+            ql.textContent = 'View in AR (iOS)';
+
+            // When clicked: if native app bridge exists, call it. Otherwise let rel="ar" open Quick Look.
+            ql.addEventListener('click', async (ev) => {
+                // if running inside native iOS WKWebView with message handler
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAR) {
+                    ev.preventDefault();
+                    // send the USDZ URL (can be absolute HTTPS or bundled in app)
+                    window.webkit.messageHandlers.openAR.postMessage({ url: usdHref });
+                    return;
+                }
+            });
+            document.body.appendChild(ql);
+
+            // Hide the A-Frame entry UI while Quick Look flow is shown
+            if (entryBtn) entryBtn.style.display = 'none';
+            const aframeEntry = document.getElementById('enter-ar');
+            if (aframeEntry) aframeEntry.setAttribute('visible', 'false');
+            exitBtn.style.display = 'none';
+
+            // Detect when user returns from Quick Look (page becomes visible again)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // restore UI if needed
+                    if (entryBtn) entryBtn.style.display = 'block';
+                }
+            });
+        }
+    </script>
+</html>
