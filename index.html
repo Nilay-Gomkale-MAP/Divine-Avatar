@@ -13,16 +13,12 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
         <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
         <style>
             /* page background: slightly brighter spotlight, vertically centered, ~20% wider radius */
-            body {
+            body, html {
                 margin: 0;
                 overflow: hidden;
                 height: 100%;
                 /* center the spotlight vertically (50%), keep brighter inner spot and wider radius */
                 background: radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed;
-            }
-
-            body.ar-mode {
-                background: transparent !important;
             }
 
             /* let the A-Frame canvas be transparent so the gradient shows through */
@@ -37,7 +33,7 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
             }
 
             /* custom AR Entry button: white fill, black text, bottom-center */
-            #myEnterARButton {
+            #myEnterARButton, #quicklookButton {
                 position: absolute;
                 bottom: 40px;
                 left: 50%;
@@ -72,6 +68,23 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
                 padding: 8px 12px;
                 font-weight: bold;
             }
+
+            /* Quick Look button style (iOS) */
+            /* #quicklookButton {
+                position: absolute;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 12px 20px;
+                background: rgba(255,255,255,0.95);
+                color: #000;
+                border-radius: 6px;
+                z-index: 10000;
+                text-decoration: none;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 16px;
+                -webkit-tap-highlight-color: transparent;
+            } */
         </style>
     </head>
 
@@ -156,6 +169,7 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
         </a-scene>
     </body>
     
+    <!-- SCRIPT -->
     <script>
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
@@ -241,7 +255,6 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
 
             // prepare for AR placement
             placed = false;
-            document.body.classList.add('ar-mode'); // make background transparent in AR
             arModel.setAttribute('visible', 'false');
             pageModel.setAttribute('visible', 'false');
             camera.setAttribute('look-controls', 'enabled', true);
@@ -292,21 +305,63 @@ I have posted this issue on the A-Frame GitHub repository: https://github.com/af
         // Exit AR: restore the page model and reset camera controls
         scene.addEventListener('exit-vr', () => {
             placed = false;
-            document.body.classList.remove('ar-mode'); // restore background
             pageModel.setAttribute('visible', 'true');
             arModel.setAttribute('visible', 'false');
             arModel.object3D.position.copy(initialPosition);
             arModel.object3D.quaternion.copy(initialQuaternion);
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
+            
             pageModel.setAttribute('position', '0 0 -1');
             pageModel.setAttribute('scale', '1.4 1.4 1.4');
             pageModel.setAttribute('visible', 'true');
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
             stopHitTest();
-            console.log('pageModel visible:', pageModel.getAttribute('visible'));
-            console.log('pageModel position:', pageModel.getAttribute('position'));
         });
+
+        // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling)
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
+        if (isIOS()) {
+            const usdHref = 'Toy_Dino_animated_ios_support.usdz';
+
+            // create a button element (works for both web and native bridge)
+            const ql = document.createElement('a');
+            ql.id = 'quicklookButton';
+            ql.setAttribute('rel', 'ar');
+            ql.setAttribute('href', usdHref);
+            ql.textContent = 'View in AR (iOS)';
+
+            // When clicked: if native app bridge exists, call it. Otherwise let rel="ar" open Quick Look.
+            ql.addEventListener('click', async (ev) => {
+                // if running inside native iOS WKWebView with message handler
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAR) {
+                    ev.preventDefault();
+                    // send the USDZ URL (can be absolute HTTPS or bundled in app)
+                    window.webkit.messageHandlers.openAR.postMessage({ url: usdHref });
+                    return;
+                }
+            });
+            document.body.appendChild(ql);
+
+            // Hide the A-Frame entry UI while Quick Look flow is shown
+            if (entryBtn) entryBtn.style.display = 'none';
+            const aframeEntry = document.getElementById('myEnterARButton');
+            if (aframeEntry) aframeEntry.setAttribute('visible', 'false');
+            exitBtn.style.display = 'none';
+
+            // Detect when user returns from Quick Look (page becomes visible again)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // restore UI if needed
+                    if (entryBtn) entryBtn.style.display = 'block';
+                }
+            });
+        }
     </script>
- </html>
+</html>
