@@ -103,7 +103,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
 
             <!-- Importing Highres Model Asset | Animated Model has been removed -->
             <a-assets>
-                <a-asset-item id="ARModel" src="Toy_Dino_highres_scaledup.glb"></a-asset-item>
+                <a-asset-item id="ARModel" src="models/Toy_Dino_highres_scaledup.glb"></a-asset-item>
             </a-assets>
 
             <!-- AR Model entity: start invisible in AR so ar-hit-test can place it, needs to start visible in Webpage mode for now-->
@@ -290,7 +290,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
 
         // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
         if (isIOS()) {
-            const usdHref = 'Toy_Dino_highres_ios_support_scaledup.usdz'; // USDZ file path
+            const usdHref = 'models/Toy_Dino_highres_ios_support_scaledup.usdz'; // USDZ file path
 
             // create a button element (works for both web and native bridge)
             const ql = document.createElement('a');
