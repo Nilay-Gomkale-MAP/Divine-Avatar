@@ -63,7 +63,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
                 id="arOnly"
                 gltf-model="#ARModel"
                 position="0 0 -1"
-                scale="0.3 0.3 0.3"
+                scale="0.2 0.2 0.2"
                 animation-mixer
                 visible="true" 
                 ></a-entity>
@@ -174,7 +174,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
             // prepare for AR placement
             placed = false;
             arModel.setAttribute('visible', 'false');
-            arModel.setAttribute('scale', '1 1 1'); // reset scale for AR
+            arModel.setAttribute('scale', '0.7 0.7 0.7'); // reset scale for AR
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
@@ -230,7 +230,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
             camera.setAttribute('orbit-controls', 'enabled', true);
             
             arModel.setAttribute('position', '0 0 -1');
-            arModel.setAttribute('scale', '0.3 0.3 0.3');
+            arModel.setAttribute('scale', '0.2 0.2 0.2'); // Reset scale for webpage view
             arModel.setAttribute('visible', 'true');
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
