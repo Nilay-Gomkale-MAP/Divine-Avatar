@@ -116,15 +116,6 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         reticle.setAttribute('visible', 'false');
         scene.appendChild(reticle);
 
-        // Text label that follows the reticle: "Tap to place"
-        const reticleLabel = document.createElement('a-entity');
-        reticleLabel.setAttribute('id', 'reticleLabel');
-        // keep label at scene root and face the camera; text width increased for readability
-        reticleLabel.setAttribute('text', 'value: Tap to place; color: #ffffff; align: center; width: 2;');
-        reticleLabel.setAttribute('look-at', '[camera]'); // always face the camera
-        reticleLabel.setAttribute('visible', 'false');
-        scene.appendChild(reticleLabel);
-
         // WebXR hit-test variables
         let xrSession = null;
         let hitTestSource = null;
@@ -162,25 +153,34 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
                 if (pose) {
                     const pos = pose.transform.position;
                     const ori = pose.transform.orientation;
+                    // position reticle
                     reticle.object3D.position.set(pos.x, pos.y, pos.z);
                     reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
                     reticle.setAttribute('visible', 'true');
 
-                    // When reticle appears: hide the DOM "scan" message and show "Tap to place"
-                    if (scanMessage && scanMessage.style.display !== 'none') {
-                        scanMessage.style.display = 'none';
+                    // Update DOM overlay: switch text to "Tap to place" and move box down
+                    if (scanMessage) {
+                        scanMessage.textContent = 'Tap to place';
+                        scanMessage.style.top = '70%'; // move the box further down
+                        scanMessage.style.transform = 'translateX(-50%)';
                     }
-                    // position the label slightly above the reticle in world space
-                    reticleLabel.object3D.position.copy(reticle.object3D.position);
-                    reticleLabel.object3D.position.y += 0.12; // raise label above ring (tweak as needed)
-                    reticleLabel.setAttribute('visible', 'true');
                 } else {
                     reticle.setAttribute('visible', 'false');
-                    reticleLabel.setAttribute('visible', 'false');
+                    // revert DOM overlay to scanning hint
+                    if (scanMessage) {
+                        scanMessage.textContent = 'Scan the area to place the model';
+                        scanMessage.style.top = '40%';
+                        scanMessage.style.transform = 'translateX(-50%)';
+                    }
                 }
             } else {
                 reticle.setAttribute('visible', 'false');
-                reticleLabel.setAttribute('visible', 'false');
+                // revert DOM overlay to scanning hint
+                if (scanMessage) {
+                    scanMessage.textContent = 'Scan the area to place the model';
+                    scanMessage.style.top = '40%';
+                    scanMessage.style.transform = 'translateX(-50%)';
+                }
             }
         }
 
@@ -207,15 +207,19 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
             if (!xrSession) return;
 
             // show scan message overlay when AR starts
-            if (scanMessage) scanMessage.style.display = 'block';
+            if (scanMessage) {
+                scanMessage.style.display = 'block';
+                scanMessage.textContent = 'Scan the area to place the model';
+                scanMessage.style.top = '40%';
+                scanMessage.style.transform = 'translateX(-50%)';
+            }
 
             // single-use select handler: place once, then stop hit test
             onSelectHandler = () => {
                 if (placed) return;
                 placeModelAtReticle();
                 placed = true;
-                // hide labels once placed
-                reticleLabel.setAttribute('visible', 'false');
+                // hide overlay when model placed
                 if (scanMessage) scanMessage.style.display = 'none';
 
                 // cleanup hit test and hide reticle after placement
@@ -270,7 +274,6 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
 
             // hide overlay message and label
             if (scanMessage) scanMessage.style.display = 'none';
-            reticleLabel.setAttribute('visible', 'false');
         });
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
