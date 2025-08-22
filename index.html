@@ -119,12 +119,11 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         // Text label that follows the reticle: "Tap to place"
         const reticleLabel = document.createElement('a-entity');
         reticleLabel.setAttribute('id', 'reticleLabel');
-        // counter-rotate so text faces the camera (reticle is rotated -90)
-        reticleLabel.setAttribute('rotation', '90 0 0');
-        reticleLabel.setAttribute('position', '0 0.02 0'); // slight offset above the ring
-        reticleLabel.setAttribute('text', 'value: Tap to place; color: #ffffff; align: center; width: 1;');
+        // keep label at scene root and face the camera; text width increased for readability
+        reticleLabel.setAttribute('text', 'value: Tap to place; color: #ffffff; align: center; width: 2;');
+        reticleLabel.setAttribute('look-at', '[camera]'); // always face the camera
         reticleLabel.setAttribute('visible', 'false');
-        reticle.appendChild(reticleLabel);
+        scene.appendChild(reticleLabel);
 
         // WebXR hit-test variables
         let xrSession = null;
@@ -171,6 +170,9 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
                     if (scanMessage && scanMessage.style.display !== 'none') {
                         scanMessage.style.display = 'none';
                     }
+                    // position the label slightly above the reticle in world space
+                    reticleLabel.object3D.position.copy(reticle.object3D.position);
+                    reticleLabel.object3D.position.y += 0.12; // raise label above ring (tweak as needed)
                     reticleLabel.setAttribute('visible', 'true');
                 } else {
                     reticle.setAttribute('visible', 'false');
