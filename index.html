@@ -105,7 +105,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         // Create a simple white reticle (ring)
         const reticle = document.createElement('a-entity');
         reticle.setAttribute('id', 'reticle');
-        reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.03; radiusOuter: 0.05;');
+        reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.1; radiusOuter: 0.15;');
         reticle.setAttribute('material', 'color: #ffffff; shader: flat; opacity: 0.95;');
         reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
         reticle.setAttribute('visible', 'false');
