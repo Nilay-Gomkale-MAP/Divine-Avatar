@@ -33,11 +33,15 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         <h1>In Celestial Company</h1>
         <p style="text-align: center;">AR campaign Proposal</p>
 
-        <!-- AR SETUP in a Containder-->
+        <!-- AR SETUP in an embedded Container-->
 
-        <!-- Overlay Section for Exit AR button in Android -->
+        <!-- Overlay Section for Exit AR button in Android AR mode-->
         <div id="overlay">
             <button id="exit-ar" style="display: none;">Exit AR</button>
+            <!-- AR DOM overlay message shown when AR starts -->
+            <div id="ar-overlay-message" class="ar-overlay-message" style="display: none;">
+                Scan the area to place the model
+            </div>
         </div>
 
         <!-- Scene Setup Tag -->
@@ -96,6 +100,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         const arModel = document.querySelector('#arOnly');
         const entryBtn = document.getElementById('enter-ar');
         const exitBtn = document.getElementById('exit-ar');
+        const scanMessage = document.getElementById('ar-overlay-message'); // NEW
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
@@ -110,6 +115,16 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
         reticle.setAttribute('visible', 'false');
         scene.appendChild(reticle);
+
+        // Text label that follows the reticle: "Tap to place"
+        const reticleLabel = document.createElement('a-entity');
+        reticleLabel.setAttribute('id', 'reticleLabel');
+        // counter-rotate so text faces the camera (reticle is rotated -90)
+        reticleLabel.setAttribute('rotation', '90 0 0');
+        reticleLabel.setAttribute('position', '0 0.02 0'); // slight offset above the ring
+        reticleLabel.setAttribute('text', 'value: Tap to place; color: #ffffff; align: center; width: 1;');
+        reticleLabel.setAttribute('visible', 'false');
+        reticle.appendChild(reticleLabel);
 
         // WebXR hit-test variables
         let xrSession = null;
@@ -151,11 +166,19 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
                     reticle.object3D.position.set(pos.x, pos.y, pos.z);
                     reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
                     reticle.setAttribute('visible', 'true');
+
+                    // When reticle appears: hide the DOM "scan" message and show "Tap to place"
+                    if (scanMessage && scanMessage.style.display !== 'none') {
+                        scanMessage.style.display = 'none';
+                    }
+                    reticleLabel.setAttribute('visible', 'true');
                 } else {
                     reticle.setAttribute('visible', 'false');
+                    reticleLabel.setAttribute('visible', 'false');
                 }
             } else {
                 reticle.setAttribute('visible', 'false');
+                reticleLabel.setAttribute('visible', 'false');
             }
         }
 
@@ -181,11 +204,18 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
             xrSession = scene.renderer.xr.getSession();
             if (!xrSession) return;
 
+            // show scan message overlay when AR starts
+            if (scanMessage) scanMessage.style.display = 'block';
+
             // single-use select handler: place once, then stop hit test
             onSelectHandler = () => {
                 if (placed) return;
                 placeModelAtReticle();
                 placed = true;
+                // hide labels once placed
+                reticleLabel.setAttribute('visible', 'false');
+                if (scanMessage) scanMessage.style.display = 'none';
+
                 // cleanup hit test and hide reticle after placement
                 stopHitTest();
                 if (xrSession && onSelectHandler) {
@@ -235,6 +265,10 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
             stopHitTest();
+
+            // hide overlay message and label
+            if (scanMessage) scanMessage.style.display = 'none';
+            reticleLabel.setAttribute('visible', 'false');
         });
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
