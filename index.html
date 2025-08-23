@@ -121,6 +121,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
         let localReferenceSpace = null;
         let placed = false;
         let onSelectHandler = null;
+        let xrFrameRequestHandle = null;
 
         async function startHitTest(session) {
             localReferenceSpace = await session.requestReferenceSpace('local');
@@ -139,9 +140,20 @@ Github Copilot has been used to assist in writing this code, particularly for th
             reticle.setAttribute('visible', 'false');
         }
 
+        // Stop the XR animation frame loop
+        function stopXRAnimation() {
+            if (xrSession && xrFrameRequestHandle !== null) {
+                xrSession.cancelAnimationFrame(xrFrameRequestHandle);
+                xrFrameRequestHandle = null;
+            }
+        }
+
+
         function onXRFrame(time, xrFrame) {
             const session = xrFrame.session;
             session.requestAnimationFrame(onXRFrame);
+            // Schedule next frame and save handle
+            xrFrameRequestHandle = session.requestAnimationFrame(onXRFrame);
 
             if (!hitTestSource || placed) return;
 
@@ -280,6 +292,8 @@ Github Copilot has been used to assist in writing this code, particularly for th
         function onXRSessionEnded() {
             const renderer = scene.renderer;
             placed = false;
+
+            stopXRAnimation(); // Stop the XR animation frame loop
 
             // Set visibility directly on Three.js object
             arModel.object3D.visible = true;
