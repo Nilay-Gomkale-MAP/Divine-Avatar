@@ -51,7 +51,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 embedded
                 renderer="alpha: true;" 
                 webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
-                xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar; exitARButton: #myExitARButton;"
+                xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar;"
                 vr-mode-ui="enabled: false"
                 style="background: transparent;"
                 ar-hit-test="target:#arOnly; enabled: true;"
@@ -206,8 +206,11 @@ Github Copilot has been used to assist in writing this code, particularly for th
             xrSession = scene.renderer.xr.getSession();
             if (!xrSession) return;
 
+            // Log XR session start and end events
             if (xrSession) {
+                console.log('XR Session started.');
                 xrSession.addEventListener('end', () => {
+                    console.log('XR Session ended.');
                     onXRSessionEnded();
                 });
             }
@@ -258,9 +261,13 @@ Github Copilot has been used to assist in writing this code, particularly for th
             init: function () {
             this.data.element.addEventListener('click', ev => {
                 this.el.sceneEl.renderer.xr.getSession().end();
-                console.log('Exit AR');
+                console.log('Exit AR Button clicked.');
             });
             }
+        });
+
+        scene.addEventListener('exit-vr', () => {
+            console.log('exit-vr event fired.');
         });
 
         // Exit AR: restore the page model and reset camera controls
