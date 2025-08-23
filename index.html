@@ -23,7 +23,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
     <head>
         <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
         <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
         <link rel="stylesheet" href="style.css"></script>
         <title>In Celestial Company - AR Proposal</title>
     </head>
@@ -142,6 +142,11 @@ Github Copilot has been used to assist in writing this code, particularly for th
         }
 
         function onXRFrame(time, xrFrame) {
+
+            if (!xrSession || !xrSession.isImmersive) {
+                // XR session ended or no longer immersive, stop rendering
+                return; 
+            }
             const session = xrFrame.session;
 
             // Throttle frame rate to reduce rendering frequency
@@ -277,6 +282,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
         // Exit AR: restore the page model and reset camera controls
         function onXRSessionEnded() {
             const renderer = scene.renderer;
+            xrSession = null
             placed = false;
 
             // Set visibility directly on Three.js object
