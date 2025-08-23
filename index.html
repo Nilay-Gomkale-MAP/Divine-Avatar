@@ -258,23 +258,45 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
         // Exit AR: restore the page model and reset camera controls
         scene.addEventListener('exit-vr', () => {
-            placed = false;
-            arModel.setAttribute('visible', 'true');
-            arModel.object3D.position.copy(initialPosition);
-            arModel.object3D.quaternion.copy(initialQuaternion);
-            camera.setAttribute('look-controls', 'enabled', false);
-            camera.setAttribute('orbit-controls', 'enabled', true);
-            
-            arModel.setAttribute('position', '0 0 -1');
-            arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
-            arModel.setAttribute('visible', 'true');
-            entryBtn.style.display = 'block'; // Show Entry button
-            exitBtn.style.display = 'none';   // Hide Exit button
-            stopHitTest();
+            // This event may fire before XR session fully ends,
+            // so defer reset until session end promise resolves
+            const renderer = scene.renderer;
 
-            // hide overlay message and label
-            if (scanMessage) scanMessage.style.display = 'none';
+            if (renderer.xr.isPresenting) {
+                const session = renderer.xr.getSession();
+                session.end().then(() => {
+                // Reset after XR session ends fully
+                onXRSessionEnded();
+                });
+            } else {
+                onXRSessionEnded();
+            }
         });
+
+        function onXRSessionEnded() {
+        const renderer = scene.renderer;
+        placed = false;
+        arModel.setAttribute('visible', 'true');
+        arModel.object3D.position.copy(initialPosition);
+        arModel.object3D.quaternion.copy(initialQuaternion);
+        camera.setAttribute('look-controls', 'enabled', false);
+        camera.setAttribute('orbit-controls', 'enabled', true);
+
+        arModel.setAttribute('position', '0 0 -1');
+        arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
+        arModel.setAttribute('visible', 'true');
+        entryBtn.style.display = 'block'; // Show Entry button
+        exitBtn.style.display = 'none';   // Hide Exit button
+        stopHitTest();
+
+        // Reset renderer size to canvas size and disable XR mode
+        renderer.xr.enabled = false;
+        const canvas = renderer.domElement;
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+        // hide overlay message and label
+        if (scanMessage) scanMessage.style.display = 'none';
+        }
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
         function isIOS() {
