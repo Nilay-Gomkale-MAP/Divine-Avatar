@@ -72,7 +72,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 visible="true" 
                 ></a-entity>
 
-                <!-- Custom AR Entry Buttons-->
+                <!-- Custom AR Entry Buttons -->
                 <a-entity id="enter-ar">Click to Start AR</a-entity>
                 <a-entity exit-ar-button="element: #exit-ar"></a-entity>
                 
@@ -206,6 +206,13 @@ Github Copilot has been used to assist in writing this code, particularly for th
             xrSession = scene.renderer.xr.getSession();
             if (!xrSession) return;
 
+            if (xrSession) {
+                xrSession.addEventListener('end', () => {
+                    onXRSessionEnded();
+                });
+            }
+
+
             // show scan message overlay when AR starts
             if (scanMessage) {
                 scanMessage.style.display = 'block';
@@ -257,46 +264,36 @@ Github Copilot has been used to assist in writing this code, particularly for th
         });
 
         // Exit AR: restore the page model and reset camera controls
-        scene.addEventListener('exit-vr', () => {
-            // This event may fire before XR session fully ends,
-            // so defer reset until session end promise resolves
-            const renderer = scene.renderer;
-
-            if (renderer.xr.isPresenting) {
-                const session = renderer.xr.getSession();
-                session.end().then(() => {
-                // Reset after XR session ends fully
-                onXRSessionEnded();
-                });
-            } else {
-                onXRSessionEnded();
-            }
-        });
-
         function onXRSessionEnded() {
-        const renderer = scene.renderer;
-        placed = false;
-        arModel.setAttribute('visible', 'true');
-        arModel.object3D.position.copy(initialPosition);
-        arModel.object3D.quaternion.copy(initialQuaternion);
-        camera.setAttribute('look-controls', 'enabled', false);
-        camera.setAttribute('orbit-controls', 'enabled', true);
+            const renderer = scene.renderer;
+            placed = false;
 
-        arModel.setAttribute('position', '0 0 -1');
-        arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
-        arModel.setAttribute('visible', 'true');
-        entryBtn.style.display = 'block'; // Show Entry button
-        exitBtn.style.display = 'none';   // Hide Exit button
-        stopHitTest();
+            // Reset model visibility and transform
+            arModel.setAttribute('visible', 'true');
+            arModel.object3D.position.copy(initialPosition);
+            arModel.object3D.quaternion.copy(initialQuaternion);
+            arModel.setAttribute('position', '0 0 -1');
+            arModel.setAttribute('scale', '0.3 0.3 0.3');
 
-        // Reset renderer size to canvas size and disable XR mode
-        renderer.xr.enabled = false;
-        const canvas = renderer.domElement;
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+            // Reset camera controls
+            camera.setAttribute('look-controls', 'enabled', false);
+            camera.setAttribute('orbit-controls', 'enabled', true);
 
-        // hide overlay message and label
-        if (scanMessage) scanMessage.style.display = 'none';
+            entryBtn.style.display = 'block'; // Show entry button
+            exitBtn.style.display = 'none';   // Hide exit button
+
+            stopHitTest();
+
+            // Disable XR mode on renderer & resize canvas framebuffer
+            renderer.xr.enabled = false;
+            const canvas = renderer.domElement;
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+            if (scanMessage) {
+                scanMessage.style.display = 'none';
+            }
         }
+
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
         function isIOS() {
