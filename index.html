@@ -204,8 +204,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
             camera.setAttribute('orbit-controls', 'enabled', false);
 
             xrSession = scene.renderer.xr.getSession();
-            if (!xrSession) return;
-
             // Log XR session start and end events
             if (xrSession) {
                 console.log('XR Session started.');
@@ -213,8 +211,12 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     console.log('XR Session ended.');
                     onXRSessionEnded();
                 });
+            } else if (!xrSession) {
+                console.log('No XR Session found.');
+                return;
+            } else {
+                console.log('Something went unexpectedly wrong with the XR Session.');
             }
-
 
             // show scan message overlay when AR starts
             if (scanMessage) {
@@ -259,10 +261,15 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 element: {type: 'selector'}
             },
             init: function () {
-            this.data.element.addEventListener('click', ev => {
-                this.el.sceneEl.renderer.xr.getSession().end();
-                console.log('Exit AR Button clicked.');
-            });
+                this.data.element.addEventListener('click', ev => {
+                    const session = this.el.sceneEl.renderer.xr.getSession();
+                    if (session && session.ended !== true) {
+                        session.end();
+                        console.log('Exit AR Button clicked, session ended requested.');
+                    } else {
+                        console.log('Exit AR Button clicked, but no active session found or already ended.');
+                    }
+                });
             }
         });
 
