@@ -148,6 +148,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 return; 
             }
             const session = xrFrame.session;
+            console.log('XR Frame received at time:', time);
 
             // Throttle frame rate to reduce rendering frequency
             if (time - lastFrameTime < 1000 / targetFPS) {
@@ -282,7 +283,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
         // Exit AR: restore the page model and reset camera controls
         function onXRSessionEnded() {
             const renderer = scene.renderer;
-            xrSession = null
             placed = false;
 
             // Set visibility directly on Three.js object
