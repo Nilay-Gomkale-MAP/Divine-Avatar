@@ -17,7 +17,7 @@ body, html {
 /* For regular HTML Tags to appear around the page, the a-scene tag was set to embed */
 #ar-scene-container {
     width: 100%;
-    height: 500px;
+    height: 700px;
     display: block;
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@ canvas {
 /* custom AR Entry button: white fill, black text, bottom-center */
 #enter-ar, #quicklookButton {
     position: absolute;
-    bottom: 24px;
+    /* bottom: 24px; */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(127,127,127,0.25);
