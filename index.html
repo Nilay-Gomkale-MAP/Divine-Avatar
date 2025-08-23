@@ -121,7 +121,8 @@ Github Copilot has been used to assist in writing this code, particularly for th
         let localReferenceSpace = null;
         let placed = false;
         let onSelectHandler = null;
-        let xrFrameRequestHandle = null;
+        let lastFrameTime = 0;
+        const targetFPS = 30; // Limit rendering to 30 FPS
 
         async function startHitTest(session) {
             localReferenceSpace = await session.requestReferenceSpace('local');
@@ -140,59 +141,44 @@ Github Copilot has been used to assist in writing this code, particularly for th
             reticle.setAttribute('visible', 'false');
         }
 
-        // Stop the XR animation frame loop
-        function stopXRAnimation() {
-            if (xrSession && xrFrameRequestHandle !== null) {
-                xrSession.cancelAnimationFrame(xrFrameRequestHandle);
-                xrFrameRequestHandle = null;
-            }
-        }
-
-
         function onXRFrame(time, xrFrame) {
             const session = xrFrame.session;
-            session.requestAnimationFrame(onXRFrame);
-            // Schedule next frame and save handle
-            // xrFrameRequestHandle = session.requestAnimationFrame(onXRFrame);
 
-            if (!hitTestSource || placed) return;
+            // Throttle frame rate to reduce rendering frequency
+            if (time - lastFrameTime < 1000 / targetFPS) {
+                // Schedule next frame, but skip update to reduce work
+                session.requestAnimationFrame(onXRFrame);
+                return;
+            }
+            lastFrameTime = time;
 
-            const hitResults = xrFrame.getHitTestResults(hitTestSource);
-            if (hitResults.length > 0) {
+            // Your hit-test and rendering logic here
+            if (hitTestSource && !placed) {
+                const hitResults = xrFrame.getHitTestResults(hitTestSource);
+                if (hitResults.length > 0) {
                 const hit = hitResults[0];
                 const pose = hit.getPose(localReferenceSpace);
                 if (pose) {
                     const pos = pose.transform.position;
                     const ori = pose.transform.orientation;
-                    // position reticle
                     reticle.object3D.position.set(pos.x, pos.y, pos.z);
                     reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
                     reticle.setAttribute('visible', 'true');
-
-                    // Update DOM overlay: switch text to "Tap to place" and move box down
                     if (scanMessage) {
-                        scanMessage.textContent = 'Tap to place';
-                        scanMessage.style.top = '70%'; // move the box further down
-                        scanMessage.style.transform = 'translateX(-50%)';
+                    scanMessage.textContent = 'Tap to place';
+                    scanMessage.style.top = '70%';
+                    scanMessage.style.transform = 'translateX(-50%)';
                     }
                 } else {
                     reticle.setAttribute('visible', 'false');
-                    // revert DOM overlay to scanning hint
-                    if (scanMessage) {
-                        scanMessage.textContent = 'Scan the area to place the model';
-                        scanMessage.style.top = '40%';
-                        scanMessage.style.transform = 'translateX(-50%)';
-                    }
                 }
-            } else {
+                } else {
                 reticle.setAttribute('visible', 'false');
-                // revert DOM overlay to scanning hint
-                if (scanMessage) {
-                    scanMessage.textContent = 'Scan the area to place the model';
-                    scanMessage.style.top = '40%';
-                    scanMessage.style.transform = 'translateX(-50%)';
                 }
             }
+
+            // Schedule next XR frame
+            session.requestAnimationFrame(onXRFrame);
         }
 
         // Placing the model using the Reticle Data
