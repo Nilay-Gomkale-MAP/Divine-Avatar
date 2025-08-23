@@ -3,20 +3,19 @@ This is a simple A-Frame (https://aframe.io/) AR scene that allows users to view
 It includes a custom button to enter AR mode, a reticle for placement, and an exit button to leave AR mode.
 The scene is designed to work on both Android and iOS devices, with a fallback for iOS devices using the native Quick Look feature.
 
+We need the model files (GLB and USDZ) to be in the same directory as this HTML file for it to work correctly.
+
 This code is a modified version of the A-Frame boilerplate template, with additional features for AR mode and custom UI elements.
 Github Copilot has been used to assist in writing this code, particularly for the AR functionality and UI elements.
 -->
 
-<!-- PROBLEM:
-AR mode buttons are not working on IOS device, on both Safari and Chrome browsers. It works fine on Android devices, however,
-there does seem to be a framebuffer issure, where the high res model is not visible once we exit from AR mode.
-
-I have posted this issue on the A-Frame GitHub repository: https://github.com/aframevr/aframe/issues/5754
-
-SOLUTION:
-From the github issue, it seems that the A-Frame AR mode is not fully supported on iOS devices due to limitations in the WebXR API.
-Instead, we can use the native iOS Quick Look feature to support AR on iOS devices.
-This involves creating a USDZ file and using a custom button to trigger the Quick Look experience.
+<!-- REQUIRED UPDATE
+    1. UI Skinning
+    2. HDRi lighting for better model presentation
+    3. Optimise all the models for mobile AR (reduce polycount, compress textures)
+    4. Link to Cumulus for each sculpture and artwork
+    5. Deciding on Page URL structure
+    6. Fix the Framebuffer warning in console
 -->
 
 <!DOCTYPE html>
@@ -26,6 +25,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
         <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
         <link rel="stylesheet" href="style.css"></script>
+        <title>In Celestial Company - AR Proposal</title>
     </head>
 
     <body>
@@ -67,7 +67,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
                 id="arOnly"
                 gltf-model="#ARModel"
                 position="0 0 -1"
-                scale="0.2 0.2 0.2"
+                scale="0.3 0.3 0.3"
                 animation-mixer
                 visible="true" 
                 ></a-entity>
@@ -84,8 +84,8 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
                 ></a-entity>
 
                 <!-- Basic lighting -->
-                <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-                <a-entity light="type: directional; intensity: 1" position="1 2 1"></a-entity>
+                <a-entity light="type: ambient; intensity: 5"></a-entity>
+                <a-entity light="type: directional; intensity: 1.3; color: #ffc800" position="1 2 1"></a-entity>
             </a-scene>
         </div>
 
@@ -266,7 +266,7 @@ This involves creating a USDZ file and using a custom button to trigger the Quic
             camera.setAttribute('orbit-controls', 'enabled', true);
             
             arModel.setAttribute('position', '0 0 -1');
-            arModel.setAttribute('scale', '0.2 0.2 0.2'); // Reset scale for webpage view
+            arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
             arModel.setAttribute('visible', 'true');
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
