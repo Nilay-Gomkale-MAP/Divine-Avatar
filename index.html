@@ -51,7 +51,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 embedded
                 renderer="alpha: true;" 
                 webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
-                xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar;"
+                xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar; exitARButton: #myExitARButton;"
                 vr-mode-ui="enabled: false"
                 style="background: transparent;"
                 ar-hit-test="target:#arOnly; enabled: true;"
@@ -68,10 +68,11 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 gltf-model="#ARModel"
                 position="0 0 -1"
                 scale="0.3 0.3 0.3"
+                animation-mixer
                 visible="true" 
                 ></a-entity>
 
-                <!-- Custom AR Entry Buttons -->
+                <!-- Custom AR Entry Buttons-->
                 <a-entity id="enter-ar">Click to Start AR</a-entity>
                 <a-entity exit-ar-button="element: #exit-ar"></a-entity>
                 
@@ -121,8 +122,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
         let localReferenceSpace = null;
         let placed = false;
         let onSelectHandler = null;
-        let lastFrameTime = 0;
-        const targetFPS = 30; // Limit rendering to 30 FPS
 
         async function startHitTest(session) {
             localReferenceSpace = await session.requestReferenceSpace('local');
@@ -142,50 +141,47 @@ Github Copilot has been used to assist in writing this code, particularly for th
         }
 
         function onXRFrame(time, xrFrame) {
-
-            if (!xrSession || !xrSession.isImmersive) {
-                // XR session ended or no longer immersive, stop rendering
-                return; 
-                console.log('XR session no longer immersive, stopping frame updates.');
-            }
             const session = xrFrame.session;
-            console.log('XR Frame received at time:', time);
+            session.requestAnimationFrame(onXRFrame);
 
-            // Throttle frame rate to reduce rendering frequency
-            if (time - lastFrameTime < 1000 / targetFPS) {
-                // Schedule next frame, but skip update to reduce work
-                session.requestAnimationFrame(onXRFrame);
-                return;
-            }
-            lastFrameTime = time;
+            if (!hitTestSource || placed) return;
 
-            // Your hit-test and rendering logic here
-            if (hitTestSource && !placed) {
-                const hitResults = xrFrame.getHitTestResults(hitTestSource);
-                if (hitResults.length > 0) {
+            const hitResults = xrFrame.getHitTestResults(hitTestSource);
+            if (hitResults.length > 0) {
                 const hit = hitResults[0];
                 const pose = hit.getPose(localReferenceSpace);
                 if (pose) {
                     const pos = pose.transform.position;
                     const ori = pose.transform.orientation;
+                    // position reticle
                     reticle.object3D.position.set(pos.x, pos.y, pos.z);
                     reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
                     reticle.setAttribute('visible', 'true');
+
+                    // Update DOM overlay: switch text to "Tap to place" and move box down
                     if (scanMessage) {
-                    scanMessage.textContent = 'Tap to place';
-                    scanMessage.style.top = '70%';
-                    scanMessage.style.transform = 'translateX(-50%)';
+                        scanMessage.textContent = 'Tap to place';
+                        scanMessage.style.top = '70%'; // move the box further down
+                        scanMessage.style.transform = 'translateX(-50%)';
                     }
                 } else {
                     reticle.setAttribute('visible', 'false');
+                    // revert DOM overlay to scanning hint
+                    if (scanMessage) {
+                        scanMessage.textContent = 'Scan the area to place the model';
+                        scanMessage.style.top = '40%';
+                        scanMessage.style.transform = 'translateX(-50%)';
+                    }
                 }
-                } else {
+            } else {
                 reticle.setAttribute('visible', 'false');
+                // revert DOM overlay to scanning hint
+                if (scanMessage) {
+                    scanMessage.textContent = 'Scan the area to place the model';
+                    scanMessage.style.top = '40%';
+                    scanMessage.style.transform = 'translateX(-50%)';
                 }
             }
-
-            // Schedule next XR frame
-            session.requestAnimationFrame(onXRFrame);
         }
 
         // Placing the model using the Reticle Data
@@ -208,19 +204,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             camera.setAttribute('orbit-controls', 'enabled', false);
 
             xrSession = scene.renderer.xr.getSession();
-            // Log XR session start and end events
-            if (xrSession) {
-                console.log('XR Session started.');
-                xrSession.addEventListener('end', () => {
-                    console.log('XR Session ended.');
-                    onXRSessionEnded();
-                });
-            } else if (!xrSession) {
-                console.log('No XR Session found.');
-                return;
-            } else {
-                console.log('Something went unexpectedly wrong with the XR Session.');
-            }
+            if (!xrSession) return;
 
             // show scan message overlay when AR starts
             if (scanMessage) {
@@ -265,63 +249,32 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 element: {type: 'selector'}
             },
             init: function () {
-                this.data.element.addEventListener('click', ev => {
-                    const session = this.el.sceneEl.renderer.xr.getSession();
-                    if (session && session.ended !== true) {
-                        session.end();
-                        console.log('Exit AR Button clicked, session ended requested.');
-                    } else {
-                        console.log('Exit AR Button clicked, but no active session found or already ended.');
-                    }
-                });
+            this.data.element.addEventListener('click', ev => {
+                this.el.sceneEl.renderer.xr.getSession().end();
+                console.log('Exit AR');
+            });
             }
-        });
-
-        scene.addEventListener('exit-vr', () => {
-            console.log('exit-vr event fired.');
         });
 
         // Exit AR: restore the page model and reset camera controls
-        function onXRSessionEnded() {
-            const renderer = scene.renderer;
+        scene.addEventListener('exit-vr', () => {
             placed = false;
-
-            // Set visibility directly on Three.js object
-            arModel.object3D.visible = true;
             arModel.setAttribute('visible', 'true');
             arModel.object3D.position.copy(initialPosition);
             arModel.object3D.quaternion.copy(initialQuaternion);
-            arModel.setAttribute('position', '0 0 -1');
-            arModel.setAttribute('scale', '0.3 0.3 0.3');
-
-            if (arModel.components['animation-mixer']) {
-                arModel.components['animation-mixer'].pause();
-                arModel.components['animation-mixer'].stop();
-            }
-
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('orbit-controls', 'enabled', true);
-
-            entryBtn.style.display = 'block';
-            exitBtn.style.display = 'none';
-
+            
+            arModel.setAttribute('position', '0 0 -1');
+            arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
+            arModel.setAttribute('visible', 'true');
+            entryBtn.style.display = 'block'; // Show Entry button
+            exitBtn.style.display = 'none';   // Hide Exit button
             stopHitTest();
 
-            renderer.xr.enabled = false;
-            const canvas = renderer.domElement;
-
-            // Delay resize slightly
-            setTimeout(() => {
-                renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-            }, 100);
-
-            if (scanMessage) {
-                scanMessage.style.display = 'none';
-            }
-            console.log('AR session ended, scene reset.');
-        }
-
-
+            // hide overlay message and label
+            if (scanMessage) scanMessage.style.display = 'none';
+        });
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
         function isIOS() {
