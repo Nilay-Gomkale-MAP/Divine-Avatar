@@ -274,6 +274,13 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
             // hide overlay message and label
             if (scanMessage) scanMessage.style.display = 'none';
+
+            setTimeout(() => {
+                if (scene && scene.renderer && scene.renderer.xr) {
+                    scene.renderer.xr.setSession(null); // Unbind XR session
+                    scene.renderer.setSize(window.innerWidth, window.innerHeight, true); // Force canvas rebind
+                }
+            }, 100);
         });
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
