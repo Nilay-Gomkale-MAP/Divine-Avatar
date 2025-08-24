@@ -129,10 +129,11 @@ Github Copilot has been used to assist in writing this code, particularly for th
         console.log("Hit test stopped");
     }
 
-    // Animation frame loop for hit test -> Problem here is that it keeps running even after XR mode is exited
+    // Animation frame loop for hit test
     function onXRFrame(time, xrFrame) {
         const session = xrFrame.session;
         session.requestAnimationFrame(onXRFrame);
+        xrSession.cancelAnimationFrame(requestHandle); //REMOVE IF APP IS CRASHING
 
         if (!hitTestSource || placed){
             console.log("No hit test source or model already placed");
@@ -244,7 +245,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
         init: function () {
             this.data.element.addEventListener('click', ev => {
                 this.el.sceneEl.renderer.xr.getSession().end();
-                requestHandle = xrSession.requestAnimationFrame(frameCallback);
                 console.log('Exit AR');
             });
         }
