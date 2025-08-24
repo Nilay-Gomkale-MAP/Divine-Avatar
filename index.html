@@ -24,6 +24,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
         <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
         <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
         <link rel="stylesheet" href="style.css"></script>
         <title>In Celestial Company - AR Proposal</title>
     </head>
@@ -40,7 +41,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
             <button id="exit-ar" style="display: none;">Exit AR</button>
             <!-- AR DOM overlay message shown when AR starts -->
             <div id="ar-overlay-message" class="ar-overlay-message" style="display: none;">
-                Scan the area to place the model
+                <!-- Lottie animation container -->
+                <div id="ar-lottie-animation" style="width: 150px; height: 150px; margin: 0 auto;"></div>
+                <p>Scan the area to place the model</p>
             </div>
         </div>
 
@@ -160,26 +163,29 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
                     // Update DOM overlay: switch text to "Tap to place" and move box down
                     if (scanMessage) {
-                        scanMessage.textContent = 'Tap to place';
+                        scanMessage.textContent = 'Tap to place the model';
                         scanMessage.style.top = '70%'; // move the box further down
                         scanMessage.style.transform = 'translateX(-50%)';
+                        loadTapAnimation();
                     }
                 } else {
                     reticle.setAttribute('visible', 'false');
                     // revert DOM overlay to scanning hint
                     if (scanMessage) {
-                        scanMessage.textContent = 'Scan the area to place the model';
+                        scanMessage.textContent = 'Scan the floor to place the model';
                         scanMessage.style.top = '40%';
                         scanMessage.style.transform = 'translateX(-50%)';
+                        loadScanAnimation();
                     }
                 }
             } else {
                 reticle.setAttribute('visible', 'false');
                 // revert DOM overlay to scanning hint
                 if (scanMessage) {
-                    scanMessage.textContent = 'Scan the area to place the model';
+                    scanMessage.textContent = 'Scan the floor to place the model';
                     scanMessage.style.top = '40%';
                     scanMessage.style.transform = 'translateX(-50%)';
+                    loadScanAnimation();
                 }
             }
         }
@@ -209,9 +215,10 @@ Github Copilot has been used to assist in writing this code, particularly for th
             // show scan message overlay when AR starts
             if (scanMessage) {
                 scanMessage.style.display = 'block';
-                scanMessage.textContent = 'Scan the area to place the model';
+                scanMessage.textContent = 'Scan the floor to place the model';
                 scanMessage.style.top = '40%';
                 scanMessage.style.transform = 'translateX(-50%)';
+                loadScanAnimation();
             }
 
             // single-use select handler: place once, then stop hit test
@@ -278,7 +285,33 @@ Github Copilot has been used to assist in writing this code, particularly for th
             if (scanMessage) scanMessage.style.display = 'none';
         });
 
-        // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
+        let lottiePlayer = null;
+
+        // Load scanning animation at start
+        function loadScanAnimation() {
+            if (lottiePlayer) lottiePlayer.destroy();
+            lottiePlayer = lottie.loadAnimation({
+                container: document.getElementById('ar-lottie-animation'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'Camera-scanning-effect.json' // scanning animation JSON URL
+            });
+        }
+
+        // Switch to tap animation when ready to place
+        function loadTapAnimation() {
+            if (lottiePlayer) lottiePlayer.destroy();
+            lottiePlayer = lottie.loadAnimation({
+                container: document.getElementById('ar-lottie-animation'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'Hand-tap.json' // tap animation JSON URL
+            });
+        }
+
+        // IOS IMPLEMENTATION (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -318,6 +351,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 if (document.visibilityState === 'visible') {
                     // restore UI if needed
                     if (entryBtn) entryBtn.style.display = 'block';
+                    setTimeout(() => {
+                    window.location.reload(); //RELOAD ON IOS when returning from Quick Look
+                    }, 100);
                 }
             });
         }
