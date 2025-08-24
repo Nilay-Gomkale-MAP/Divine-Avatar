@@ -10,171 +10,168 @@ Github Copilot has been used to assist in writing this code, particularly for th
 -->
 
 <!-- REQUIRED UPDATE
-    1. UI Skinning => Need to design a better UI skin
-    2. HDRi lighting for better model presentation => Done
-    3. Optimise all the models for mobile AR (reduce polycount, compress textures) => In progress
-    4. Link to Cumulus for each sculpture and artwork => Need to reach out to Collections team for links
-    5. Deciding on Page URL structure => Decide with RedStart
-    6. Fix the Framebuffer warning in console => Put a Github issue
+    1. UI Skinning
+    2. HDRi lighting for better model presentation
+    3. Optimise all the models for mobile AR (reduce polycount, compress textures)
+    4. Link to Cumulus for each sculpture and artwork
+    5. Deciding on Page URL structure
+    6. Fix the Framebuffer warning in console
 -->
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
+        <link rel="stylesheet" href="style.css"></script>
+        <title>In Celestial Company - AR Proposal</title>
+    </head>
 
-<head>
-    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-    </script>
-    <title>In Celestial Company - AR Proposal</title>
-</head>
+    <body>
+        <!-- Proxy Element: Build UI Skin around the a-scene tag -->
+        <h1>In Celestial Company</h1>
+        <p style="text-align: center;">AR campaign Proposal</p>
 
-<body>
-    <!-- Proxy Element: Build UI Skin around the a-scene tag -->
-    <h1>In Celestial Company</h1>
-    <p style="text-align: center;">AR campaign Proposal</p>
+        <!-- AR SETUP in an embedded Container-->
 
-    <!-- AR SETUP in an embedded Container-->
-
-    <!-- Overlay Section for Exit AR button in Android AR mode-->
-    <div id="overlay">
-        <button id="exit-ar" style="display: none;">Exit AR</button>
-        <!-- AR DOM overlay message shown when AR starts -->
-        <div id="ar-overlay-message" class="ar-overlay-message" style="display: none;">
-            Scan the area to place the model
+        <!-- Overlay Section for Exit AR button in Android AR mode-->
+        <div id="overlay">
+            <button id="exit-ar" style="display: none;">Exit AR</button>
+            <!-- AR DOM overlay message shown when AR starts -->
+            <div id="ar-overlay-message" class="ar-overlay-message" style="display: none;">
+                Scan the area to place the model
+            </div>
         </div>
-    </div>
 
-    <!-- Scene Setup Tag -->
-    <div>
-        <a-scene id="ar-scene-container" embedded renderer="alpha: true;"
-            webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
-            xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar; exitARButton: #myExitARButton;"
-            vr-mode-ui="enabled: false" style="background: transparent;" ar-hit-test="target:#arOnly; enabled: true;">
+        <!-- Scene Setup Tag -->
+        <div>
+            <a-scene
+                id="ar-scene-container"
+                embedded
+                renderer="alpha: true;" 
+                webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
+                xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar; exitARButton: #myExitARButton;"
+                vr-mode-ui="enabled: false"
+                style="background: transparent;"
+                ar-hit-test="target:#arOnly; enabled: true;"
+                >
 
-            <!-- Importing Highres Model Asset | Animated Model has been removed -->
-            <a-assets>
-                <a-asset-item id="ARModel" src="model.glb"></a-asset-item>
-            </a-assets>
+                <!-- Importing Highres Model Asset | Animated Model has been removed -->
+                <a-assets>
+                    <a-asset-item id="ARModel" src="model.glb"></a-asset-item>
+                </a-assets>
 
-            <!-- AR Model entity: start invisible in AR so ar-hit-test can place it, needs to start visible in Webpage mode for now-->
-            <a-entity id="arOnly" gltf-model="#ARModel" position="0 0 -1" scale="0.3 0.3 0.3" animation-mixer
-                visible="true"></a-entity>
+                <!-- AR Model entity: start invisible in AR so ar-hit-test can place it, needs to start visible in Webpage mode for now-->
+                <a-entity
+                id="arOnly"
+                gltf-model="#ARModel"
+                position="0 0 -1"
+                scale="0.3 0.3 0.3"
+                animation-mixer
+                visible="true" 
+                ></a-entity>
 
-            <!-- Custom AR Entry Buttons-->
-            <a-entity id="enter-ar">Click to Start AR</a-entity>
-            <a-entity exit-ar-button="element: #exit-ar"></a-entity>
+                <!-- Custom AR Entry Buttons-->
+                <a-entity id="enter-ar">Click to Start AR</a-entity>
+                <a-entity exit-ar-button="element: #exit-ar"></a-entity>
+                
+                <!-- Camera with orbit controls for desktop and non-AR mode -->
+                <a-entity
+                camera
+                look-controls="enabled: false"
+                orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"
+                ></a-entity>
 
-            <!-- Camera with orbit controls for desktop and non-AR mode -->
-            <a-entity camera look-controls="enabled: false"
-                orbit-controls="target: 0 0.25 -1; enableZoom: true; enablePan: false; initialPosition: 0 0.5 -0.2; rotateSpeed: 1; zoomSpeed: 1.2; minDistance: 0.25; maxDistance: 2.5; autoRotate: true"></a-entity>
+                <!-- Basic lighting -->
+                <a-entity light="type: ambient; intensity: 5"></a-entity>
+                <a-entity light="type: directional; intensity: 1.3; color: #ffc800" position="1 2 1"></a-entity>
+            </a-scene>
+        </div>
 
-            <!-- Basic lighting -->
-            <a-entity light="type: ambient; intensity: 5"></a-entity>
-            <a-entity light="type: directional; intensity: 1.3; color: #ffc800" position="1 2 1"></a-entity>
-        </a-scene>
-    </div>
+        <!-- AR SET UP END -->
+    </body>
+    
+    <!-- SCRIPT -->
+    <script>
+        // Query Selectors and initial setup
+        const scene = document.querySelector('a-scene');
+        const camera = scene.querySelector('[camera]');
+        const arModel = document.querySelector('#arOnly');
+        const entryBtn = document.getElementById('enter-ar');
+        const exitBtn = document.getElementById('exit-ar');
+        const scanMessage = document.getElementById('ar-overlay-message'); // NEW
 
-    <!-- AR SET UP END -->
-</body>
+        // store initial transform so we can restore on exit-vr
+        const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
+        const initialPosition = new THREE.Vector3(initPosAttr.x, initPosAttr.y, initPosAttr.z);
+        const initialQuaternion = arModel.object3D.quaternion.clone();
 
-<!-- SCRIPT -->
-<script>
-    // Query Selectors and initial setup
-    const scene = document.querySelector('a-scene');
-    const camera = scene.querySelector('[camera]');
-    const arModel = document.querySelector('#arOnly');
-    const entryBtn = document.getElementById('enter-ar');
-    const exitBtn = document.getElementById('exit-ar');
-    const scanMessage = document.getElementById('ar-overlay-message'); // NEW
-
-    // store initial transform so we can restore on exit-vr
-    const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
-    const initialPosition = new THREE.Vector3(initPosAttr.x, initPosAttr.y, initPosAttr.z);
-    const initialQuaternion = arModel.object3D.quaternion.clone();
-
-    // Create a simple white reticle (ring)
-    const reticle = document.createElement('a-entity');
-    reticle.setAttribute('id', 'reticle');
-    reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.1; radiusOuter: 0.15;');
-    reticle.setAttribute('material', 'color: #ffffff; shader: flat; opacity: 0.95;');
-    reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
-    reticle.setAttribute('visible', 'false');
-    scene.appendChild(reticle);
-
-    // WebXR hit-test variables
-    let xrSession = null;
-    let hitTestSource = null;
-    let localReferenceSpace = null;
-    let placed = false;
-    let onSelectHandler = null;
-
-    async function startHitTest(session) {
-        localReferenceSpace = await session.requestReferenceSpace('local');
-        const viewerSpace = await session.requestReferenceSpace('viewer');
-        hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-        session.requestAnimationFrame(onXRFrame);
-    }
-
-    function stopHitTest() {
-        if (hitTestSource) {
-            hitTestSource.cancel && hitTestSource.cancel();
-            hitTestSource = null;
-        }
-        localReferenceSpace = null;
-        xrSession = null;
+        // Create a simple white reticle (ring)
+        const reticle = document.createElement('a-entity');
+        reticle.setAttribute('id', 'reticle');
+        reticle.setAttribute('geometry', 'primitive: ring; radiusInner: 0.1; radiusOuter: 0.15;');
+        reticle.setAttribute('material', 'color: #ffffff; shader: flat; opacity: 0.95;');
+        reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
         reticle.setAttribute('visible', 'false');
-        console.log("Hit test stopped");
-    }
+        scene.appendChild(reticle);
 
-    // Animation frame loop for hit test
-    function onXRFrame(time, xrFrame) {
-        const session = xrFrame.session;
+        // WebXR hit-test variables
+        let xrSession = null;
+        let hitTestSource = null;
+        let localReferenceSpace = null;
+        let placed = false;
+        let onSelectHandler = null;
 
-        // CLEAR FRAMEBUFFER WARNING FIX
-        // Get the WebGL context
-        const canvas = document.querySelector('canvas');
-        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-        
-        const glLayer = session.renderState.baseLayer;
-        const framebuffer = glLayer.framebuffer;
+        async function startHitTest(session) {
+            localReferenceSpace = await session.requestReferenceSpace('local');
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+            session.requestAnimationFrame(onXRFrame);
+        }
 
-        // Bind the framebuffer associated with the XRWebGLLayer
-        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+        function stopHitTest() {
+            if (hitTestSource) {
+                hitTestSource.cancel && hitTestSource.cancel();
+                hitTestSource = null;
+            }
+            localReferenceSpace = null;
+            xrSession = null;
+            reticle.setAttribute('visible', 'false');
+        }
 
-        // Set the viewport to the size of the framebuffer
-        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        function onXRFrame(time, xrFrame) {
+            const session = xrFrame.session;
+            session.requestAnimationFrame(onXRFrame);
 
-        // Clear the framebuffer (now safe within the animation frame)
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        // END CLEAR FRAMEBUFFER WARNING FIX
+            if (!hitTestSource || placed) return;
 
-        session.requestAnimationFrame(onXRFrame);
+            const hitResults = xrFrame.getHitTestResults(hitTestSource);
+            if (hitResults.length > 0) {
+                const hit = hitResults[0];
+                const pose = hit.getPose(localReferenceSpace);
+                if (pose) {
+                    const pos = pose.transform.position;
+                    const ori = pose.transform.orientation;
+                    // position reticle
+                    reticle.object3D.position.set(pos.x, pos.y, pos.z);
+                    reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
+                    reticle.setAttribute('visible', 'true');
 
-        if (!hitTestSource || placed){
-            console.log("No hit test source or model already placed");
-            return;
-        } 
-
-        const hitResults = xrFrame.getHitTestResults(hitTestSource);
-        if (hitResults.length > 0) {
-            const hit = hitResults[0];
-            const pose = hit.getPose(localReferenceSpace);
-            if (pose) {
-                const pos = pose.transform.position;
-                const ori = pose.transform.orientation;
-                // position reticle
-                reticle.object3D.position.set(pos.x, pos.y, pos.z);
-                reticle.object3D.quaternion.set(ori.x, ori.y, ori.z, ori.w);
-                reticle.setAttribute('visible', 'true');
-
-                // Update DOM overlay: switch text to "Tap to place" and move box down
-                if (scanMessage) {
-                    scanMessage.textContent = 'Tap to place';
-                    scanMessage.style.top = '70%'; // move the box further down
-                    scanMessage.style.transform = 'translateX(-50%)';
+                    // Update DOM overlay: switch text to "Tap to place" and move box down
+                    if (scanMessage) {
+                        scanMessage.textContent = 'Tap to place';
+                        scanMessage.style.top = '70%'; // move the box further down
+                        scanMessage.style.transform = 'translateX(-50%)';
+                    }
+                } else {
+                    reticle.setAttribute('visible', 'false');
+                    // revert DOM overlay to scanning hint
+                    if (scanMessage) {
+                        scanMessage.textContent = 'Scan the area to place the model';
+                        scanMessage.style.top = '40%';
+                        scanMessage.style.transform = 'translateX(-50%)';
+                    }
                 }
             } else {
                 reticle.setAttribute('visible', 'false');
@@ -185,152 +182,142 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     scanMessage.style.transform = 'translateX(-50%)';
                 }
             }
-        } else {
-            reticle.setAttribute('visible', 'false');
-            // revert DOM overlay to scanning hint
+        }
+
+        // Placing the model using the Reticle Data
+        function placeModelAtReticle() {
+            if (!reticle.getAttribute('visible')) return;
+            arModel.object3D.position.copy(reticle.object3D.position);
+            arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
+            arModel.setAttribute('visible', 'true');
+        }
+
+        // Enter AR: hide the desktop model and start hit test for placement
+        scene.addEventListener('enter-vr', async () => {
+            if (!scene.is('ar-mode')) return;
+
+            // prepare for AR placement
+            placed = false;
+            arModel.setAttribute('visible', 'false');
+            arModel.setAttribute('scale', '0.7 0.7 0.7'); // reset scale for AR
+            camera.setAttribute('look-controls', 'enabled', true);
+            camera.setAttribute('orbit-controls', 'enabled', false);
+
+            xrSession = scene.renderer.xr.getSession();
+            if (!xrSession) return;
+
+            // show scan message overlay when AR starts
             if (scanMessage) {
+                scanMessage.style.display = 'block';
                 scanMessage.textContent = 'Scan the area to place the model';
                 scanMessage.style.top = '40%';
                 scanMessage.style.transform = 'translateX(-50%)';
             }
-        }
-    }
 
-    // Placing the model using the Reticle Data
-    function placeModelAtReticle() {
-        if (!reticle.getAttribute('visible')) return;
-        arModel.object3D.position.copy(reticle.object3D.position);
-        arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
-        arModel.setAttribute('visible', 'true');
-    }
+            // single-use select handler: place once, then stop hit test
+            onSelectHandler = () => {
+                if (placed) return;
+                placeModelAtReticle();
+                placed = true;
+                // hide overlay when model placed
+                if (scanMessage) scanMessage.style.display = 'none';
 
-    // Enter AR: hide the desktop model and start hit test for placement
-    scene.addEventListener('enter-vr', async () => {
-        if (!scene.is('ar-mode')) return;
+                // cleanup hit test and hide reticle after placement
+                stopHitTest();
+                if (xrSession && onSelectHandler) {
+                    xrSession.removeEventListener('select', onSelectHandler);
+                }
+            };
+            xrSession.addEventListener('select', onSelectHandler);
 
-        // prepare for AR placement
-        placed = false;
-        arModel.setAttribute('visible', 'false');
-        arModel.setAttribute('scale', '0.7 0.7 0.7'); // reset scale for AR
-        camera.setAttribute('look-controls', 'enabled', true);
-        camera.setAttribute('orbit-controls', 'enabled', false);
+            xrSession.addEventListener('end', () => {
+                stopHitTest();
+            });
 
-        xrSession = scene.renderer.xr.getSession();
-        if (!xrSession) return;
-
-        // show scan message overlay when AR starts
-        if (scanMessage) {
-            scanMessage.style.display = 'block';
-            scanMessage.textContent = 'Scan the area to place the model';
-            scanMessage.style.top = '40%';
-            scanMessage.style.transform = 'translateX(-50%)';
-        }
-
-        // single-use select handler: place once, then stop hit test
-        onSelectHandler = () => {
-            if (placed) return;
-            placeModelAtReticle();
-            placed = true;
-            // hide overlay when model placed
-            if (scanMessage) scanMessage.style.display = 'none';
-
-            // cleanup hit test and hide reticle after placement
-            stopHitTest();
-            if (xrSession && onSelectHandler) {
-                xrSession.removeEventListener('select', onSelectHandler);
+            try {
+                await startHitTest(xrSession);
+            } catch (err) {
+                console.warn('Hit test start failed:', err);
             }
-        };
-        xrSession.addEventListener('select', onSelectHandler);
-
-        xrSession.addEventListener('end', () => {
-            stopHitTest();
+            entryBtn.style.display = 'none'; // Hide Entry Button
+            exitBtn.style.display = 'block'; //Show Exit Button
         });
 
-        try {
-            await startHitTest(xrSession);
-        } catch (err) {
-            console.warn('Hit test start failed:', err);
-        }
-        entryBtn.style.display = 'none'; // Hide Entry Button
-        exitBtn.style.display = 'block'; //Show Exit Button
-    });
-
-    //Code for exit AR borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
-    AFRAME.registerComponent('exit-ar-button', {
-        schema: {
-            element: { type: 'selector' }
-        },
-        init: function () {
+        //Code for exit AR borrowed from Boilerplate template: https://github.com/aframevr/aframe/blob/master/examples/boilerplate/webxr-dom-overlay/index.html
+        AFRAME.registerComponent('exit-ar-button', {
+            schema: {
+                element: {type: 'selector'}
+            },
+            init: function () {
             this.data.element.addEventListener('click', ev => {
                 this.el.sceneEl.renderer.xr.getSession().end();
                 console.log('Exit AR');
             });
+            }
+        });
+
+        // Exit AR: restore the page model and reset camera controls
+        scene.addEventListener('exit-vr', () => {
+            placed = false;
+            arModel.setAttribute('visible', 'true');
+            arModel.object3D.position.copy(initialPosition);
+            arModel.object3D.quaternion.copy(initialQuaternion);
+            camera.setAttribute('look-controls', 'enabled', false);
+            camera.setAttribute('orbit-controls', 'enabled', true);
+            
+            arModel.setAttribute('position', '0 0 -1');
+            arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
+            arModel.setAttribute('visible', 'true');
+            entryBtn.style.display = 'block'; // Show Entry button
+            exitBtn.style.display = 'none';   // Hide Exit button
+            stopHitTest();
+
+            // hide overlay message and label
+            if (scanMessage) scanMessage.style.display = 'none';
+        });
+
+        // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
-    });
 
-    // Exit AR: restore the page model and reset camera controls
-    scene.addEventListener('exit-vr', () => {
-        placed = false;
-        arModel.setAttribute('visible', 'true');
-        arModel.object3D.position.copy(initialPosition);
-        arModel.object3D.quaternion.copy(initialQuaternion);
-        camera.setAttribute('look-controls', 'enabled', false);
-        camera.setAttribute('orbit-controls', 'enabled', true);
+        // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
+        if (isIOS()) {
+            const usdHref = 'model.usdz'; // USDZ file path
 
-        arModel.setAttribute('position', '0 0 -1');
-        arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
-        arModel.setAttribute('visible', 'true');
-        entryBtn.style.display = 'block'; // Show Entry button
-        exitBtn.style.display = 'none';   // Hide Exit button
-        stopHitTest();
+            // create a button element (works for both web and native bridge)
+            const ql = document.createElement('a');
+            ql.id = 'quicklookButton';
+            ql.setAttribute('rel', 'ar');
+            ql.setAttribute('href', usdHref);
+            ql.textContent = 'View in AR (iOS)';
 
-        // hide overlay message and label
-        if (scanMessage) scanMessage.style.display = 'none';
-    });
+            // When clicked: if native app bridge exists, call it. Otherwise let rel="ar" open Quick Look.
+            ql.addEventListener('click', async (ev) => {
+                // if running inside native iOS WKWebView with message handler
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAR) {
+                    ev.preventDefault();
+                    // send the USDZ URL (can be absolute HTTPS or bundled in app)
+                    window.webkit.messageHandlers.openAR.postMessage({ url: usdHref });
+                    return;
+                }
+            });
+            document.body.appendChild(ql);
 
-    // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
-    function isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    }
+            // Hide the A-Frame entry UI while Quick Look flow is shown
+            if (entryBtn) entryBtn.style.display = 'none';
+            const aframeEntry = document.getElementById('enter-ar');
+            if (aframeEntry) aframeEntry.setAttribute('visible', 'false');
+            exitBtn.style.display = 'none';
 
-    // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
-    if (isIOS()) {
-        const usdHref = 'model.usdz'; // USDZ file path
-
-        // create a button element (works for both web and native bridge)
-        const ql = document.createElement('a');
-        ql.id = 'quicklookButton';
-        ql.setAttribute('rel', 'ar');
-        ql.setAttribute('href', usdHref);
-        ql.textContent = 'View in AR (iOS)';
-
-        // When clicked: if native app bridge exists, call it. Otherwise let rel="ar" open Quick Look.
-        ql.addEventListener('click', async (ev) => {
-            // if running inside native iOS WKWebView with message handler
-            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAR) {
-                ev.preventDefault();
-                // send the USDZ URL (can be absolute HTTPS or bundled in app)
-                window.webkit.messageHandlers.openAR.postMessage({ url: usdHref });
-                return;
-            }
-        });
-        document.body.appendChild(ql);
-
-        // Hide the A-Frame entry UI while Quick Look flow is shown
-        if (entryBtn) entryBtn.style.display = 'none';
-        const aframeEntry = document.getElementById('enter-ar');
-        if (aframeEntry) aframeEntry.setAttribute('visible', 'false');
-        exitBtn.style.display = 'none';
-
-        // Detect when user returns from Quick Look (page becomes visible again)
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                // restore UI if needed
-                if (entryBtn) entryBtn.style.display = 'block';
-            }
-        });
-    }
-</script>
-
+            // Detect when user returns from Quick Look (page becomes visible again)
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // restore UI if needed
+                    if (entryBtn) entryBtn.style.display = 'block';
+                }
+            });
+        }
+    </script>
 </html>
