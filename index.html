@@ -166,7 +166,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
                         scanMessage.textContent = 'Tap to place the model';
                         scanMessage.style.top = '70%'; // move the box further down
                         scanMessage.style.transform = 'translateX(-50%)';
-                        loadTapAnimation();
                     }
                 } else {
                     reticle.setAttribute('visible', 'false');
@@ -175,7 +174,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
                         scanMessage.textContent = 'Scan the floor to place the model';
                         scanMessage.style.top = '40%';
                         scanMessage.style.transform = 'translateX(-50%)';
-                        loadScanAnimation();
                     }
                 }
             } else {
@@ -185,7 +183,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     scanMessage.textContent = 'Scan the floor to place the model';
                     scanMessage.style.top = '40%';
                     scanMessage.style.transform = 'translateX(-50%)';
-                    loadScanAnimation();
                 }
             }
         }
@@ -218,7 +215,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 scanMessage.textContent = 'Scan the floor to place the model';
                 scanMessage.style.top = '40%';
                 scanMessage.style.transform = 'translateX(-50%)';
-                loadScanAnimation();
             }
 
             // single-use select handler: place once, then stop hit test
@@ -284,32 +280,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
             // hide overlay message and label
             if (scanMessage) scanMessage.style.display = 'none';
         });
-
-        let lottiePlayer = null;
-
-        // Load scanning animation at start
-        function loadScanAnimation() {
-            if (lottiePlayer) lottiePlayer.destroy();
-            lottiePlayer = lottie.loadAnimation({
-                container: document.getElementById('ar-lottie-animation'),
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json' // scanning animation JSON URL
-            });
-        }
-
-        // Switch to tap animation when ready to place
-        function loadTapAnimation() {
-            if (lottiePlayer) lottiePlayer.destroy();
-            lottiePlayer = lottie.loadAnimation({
-                container: document.getElementById('ar-lottie-animation'),
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: 'https://lottie.host/bbf20588-17d2-48e7-be5a-4569b7f6b6b2/fy6lc2Ptbm.json' // tap animation JSON URL
-            });
-        }
 
         // IOS IMPLEMENTATION (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
         function isIOS() {
