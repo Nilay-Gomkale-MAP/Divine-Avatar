@@ -139,6 +139,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
     // Animation frame loop for hit test
     function onXRFrame(time, xrFrame) {
+        const session = xrFrame.session;
 
         // CLEAR FRAMEBUFFER WARNING FIX
         const glLayer = session.renderState.baseLayer;
@@ -155,7 +156,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         // END CLEAR FRAMEBUFFER WARNING FIX
 
-        const session = xrFrame.session;
         session.requestAnimationFrame(onXRFrame);
 
         if (!hitTestSource || placed){
