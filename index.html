@@ -133,7 +133,8 @@ Github Copilot has been used to assist in writing this code, particularly for th
     function onXRFrame(time, xrFrame) {
         const session = xrFrame.session;
         session.requestAnimationFrame(onXRFrame);
-        session.cancelAnimationFrame(requestHandle); //REMOVE IF APP IS CRASHING
+        requestHandle = xrSession.requestAnimationFrame(frameCallback); //REMOVE IF APP IS CRASHING
+        console.log(requestHandle)
 
         if (!hitTestSource || placed){
             console.log("No hit test source or model already placed");
