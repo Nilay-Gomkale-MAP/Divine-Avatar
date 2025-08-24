@@ -109,7 +109,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
     let localReferenceSpace = null;
     let placed = false;
     let onSelectHandler = null;
-    let requestHandle = null;
 
     async function startHitTest(session) {
         localReferenceSpace = await session.requestReferenceSpace('local');
@@ -133,8 +132,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
     function onXRFrame(time, xrFrame) {
         const session = xrFrame.session;
         session.requestAnimationFrame(onXRFrame);
-        requestHandle = xrSession.requestAnimationFrame(frameCallback); //REMOVE IF APP IS CRASHING
-        console.log(requestHandle)
 
         if (!hitTestSource || placed){
             console.log("No hit test source or model already placed");
@@ -254,7 +251,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
     // Exit AR: restore the page model and reset camera controls
     scene.addEventListener('exit-vr', () => {
         placed = false;
-        xrSession.cancelAnimationFrame(requestHandle);
         arModel.setAttribute('visible', 'true');
         arModel.object3D.position.copy(initialPosition);
         arModel.object3D.quaternion.copy(initialQuaternion);
