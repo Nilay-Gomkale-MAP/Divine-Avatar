@@ -252,9 +252,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 this.data.element.addEventListener('click', ev => {
                     this.el.sceneEl.renderer.xr.getSession().end();
                     console.log('Exit AR');
+                    // RELOAD THE PAGE on exit to reset the model and UI
+                    window.location.reload();
                 });
-                // RELOAD THE PAGE on exit to reset the model and UI
-                window.location.reload();
             }
         });
 
