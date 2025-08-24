@@ -109,11 +109,20 @@ Github Copilot has been used to assist in writing this code, particularly for th
     let localReferenceSpace = null;
     let placed = false;
     let onSelectHandler = null;
+    let gl = null;
 
     async function startHitTest(session) {
         localReferenceSpace = await session.requestReferenceSpace('local');
         const viewerSpace = await session.requestReferenceSpace('viewer');
         hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+        // Obtain and store the gl context once the session starts
+        const glLayer = xrSession.renderState.baseLayer;
+        if (glLayer) {
+            gl = glLayer.context;
+        } else {
+            console.error("XRWebGLLayer baseLayer not found.");
+            // Handle this error appropriately
+        }
         session.requestAnimationFrame(onXRFrame);
     }
 
@@ -132,9 +141,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
     function onXRFrame(time, xrFrame) {
 
         // CLEAR FRAMEBUFFER WARNING FIX
-        const glLayer = xrSession.renderState.baseLayer;
-        // Obtain the WebGL rendering context from the glLayer
-        const gl = glLayer.context;
+        const glLayer = session.renderState.baseLayer;
         const framebuffer = glLayer.framebuffer;
 
         // Bind the framebuffer associated with the XRWebGLLayer
