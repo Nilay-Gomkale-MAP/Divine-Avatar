@@ -69,6 +69,11 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     <a-asset-item id="ARModel" src="model.glb"></a-asset-item>
                 </a-assets>
 
+                <!-- Preloading Audio Asset -->
+                <a-assets>
+                    <audio id="audio" src="Strong-Wind.mp3" preload="auto"></audio>
+                </a-assets>
+
                 <!-- AR Model entity: start invisible in AR so ar-hit-test can place it, needs to start visible in Webpage mode for now-->
                 <a-entity
                 id="arOnly"
@@ -76,9 +81,13 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 position="0 0 -1"
                 scale="0.3 0.3 0.3"
                 animation-mixer
-                visible="true" 
-                sound="src: url(Strong-Wind.mp3); loop: true;"
-                ></a-entity>
+                visible="true"
+                >
+                    <!-- Sound component attached to the model entity -->
+                    <a-entity sound="src: #audio; loop: true;"></a-entity>
+                </a-entity>
+
+                
 
                 <!-- Custom AR Entry Buttons-->
                 <a-entity id="enter-ar">Click to Start AR</a-entity>
@@ -106,6 +115,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
         const arModel = document.querySelector('#arOnly');
+        const sound = document.querySelector('[sound]');
+
+        // Custom AR buttons
         const entryBtn = document.getElementById('enter-ar');
         const exitBtn = document.getElementById('exit-ar');
         const cumulusBtn = document.getElementById('cumulusBtn');
@@ -241,7 +253,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             onSelectHandler = () => {
                 if (placed) return;
                 placeModelAtReticle();
-                arModel.component.sound.playSound(); // Play sound when model is placed
+                sound.component.sound.playSound(); // Play sound when model is placed
                 placed = true;
                 // hide overlay when model placed
                 if (instructionAR) instructionAR.style.display = 'none';
@@ -295,7 +307,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             arModel.setAttribute('position', '0 0 -1');
             arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
             arModel.setAttribute('visible', 'true');
-            arModel.component.sound.stopSound(); // Stop sound when model when exiting AR
+            sound.component.sound.stopSound(); // Stop sound when model when exiting AR
             cumulusBtn.style.display = 'none'; // hide Cumulus button on exit
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
