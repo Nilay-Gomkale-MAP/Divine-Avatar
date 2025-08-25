@@ -76,6 +76,7 @@ canvas {
     /* box-shadow: 0 4px 12px rgba(0,0,0,0.25); */
     -webkit-tap-highlight-color: transparent;
     text-decoration: none;
+    text-wrap: nowrap;
 }
 
 /* custom AR Exit button: white fill, black text, top-right */
