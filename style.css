@@ -97,13 +97,7 @@ canvas {
     font-size: 16px;
     text-align: center;
     z-index: 10002;
-}
-
-#ar-lottie-animation {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-  display: block;
+    gap: 12px;
 }
 
 /* AR SET UP END */
