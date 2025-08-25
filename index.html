@@ -353,25 +353,25 @@ Github Copilot has been used to assist in writing this code, particularly for th
         // SCREEN SHOTTING CODE (WORK IN PROGRESS)
         document.addEventListener('DOMContentLoaded', () => {
             const screenshotBtn = document.getElementById('screenshot-btn');
+
+            // Create flash effect overlay
             const flash = document.createElement('div');
             flash.className = 'flash-effect';
             document.body.appendChild(flash);
 
-            const arScene = document.querySelector('a-scene');
-            arScene.renderer.preserveDrawingBuffer = true; // ensure canvas is not cleared
-
-            function initScreenshot() {
-                if (!arScene.renderer) {
-                console.warn('Renderer not ready yet, retrying...');
-                setTimeout(initScreenshot, 500);
+            // Wait for A-Frame scene to load
+            const scene = document.querySelector('a-scene');
+            scene.addEventListener('loaded', () => {
+                console.log('A-Frame scene loaded.');
+                
+                const arCanvas = document.querySelector('canvas');
+                if (!arCanvas) {
+                console.error('AR canvas not found!');
                 return;
                 }
 
-                const arCanvas = arScene.renderer.domElement;
-                console.log('Canvas ready for screenshots');
-
                 screenshotBtn.addEventListener('click', () => {
-                console.log('Screenshot clicked');
+                // Flash feedback
                 flash.classList.add('flash-active');
                 setTimeout(() => flash.classList.remove('flash-active'), 200);
 
@@ -381,15 +381,11 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     link.href = dataURL;
                     link.download = `ar-screenshot-${Date.now()}.png`;
                     link.click();
-                    console.log('Screenshot saved');
                 } catch (err) {
                     console.error('Screenshot failed:', err);
                 }
                 });
-            }
-
-            // Use render-target-loaded if available
-            scene.addEventListener('render-target-loaded', initScreenshot);
+            });
         });
     </script>
 </html>
