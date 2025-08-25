@@ -40,9 +40,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
         <div id="overlay">
             <button id="exit-ar" style="display: none;">Exit AR</button>
             <!-- AR DOM overlay message shown when AR starts -->
-            <div id="ar-overlay-message" class="ar-overlay-message" style="display: none;">
-                <dotlottie-wc id="lottieAnimation" src="https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json" style="width: 300px;height: 300px" speed="1" autoplay loop></dotlottie-wc>
-                <p>Scan the area to place the model</p>
+            <div id="ar-overlay-instruction" class="ar-overlay-instruction" style="display: block;">
+                <dotlottie-wc id="ar-overlay-lottie" src="https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json" speed="1" autoplay loop></dotlottie-wc>
+                <p id="ar-overlay-text">Scan the area to place the model</p>
             </div>
         </div>
 
@@ -92,22 +92,25 @@ Github Copilot has been used to assist in writing this code, particularly for th
         </div>
         <!-- AR SET UP END -->
 
-        <div>
+        <!-- <div>
             <dotlottie-wc src="https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json" style="width: 300px;height: 300px" speed="1" autoplay loop></dotlottie-wc>
             <dotlottie-wc src="https://lottie.host/838b4e8e-a836-4b1d-9f06-00c9f0dedc8e/xQetxKwqpy.lottie" style="width: 300px;height: 300px" speed="1" autoplay loop></dotlottie-wc>
-        </div>
+        </div> -->
     </body>
     
     <!-- SCRIPT -->
     <script>
+
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
         const arModel = document.querySelector('#arOnly');
         const entryBtn = document.getElementById('enter-ar');
         const exitBtn = document.getElementById('exit-ar');
-        const scanMessage = document.getElementById('ar-overlay-message'); // NEW
-        const lottieAnim = document.getElementById('lottieAnimation');
+        const instructionAR = document.getElementById('ar-overlay-instruction'); // NEW
+        const instructionText = document.getElementById('ar-overlay-text'); // NEW
+        const lottieInstructions = document.getElementById('ar-overlay-lottie'); // NEW
+
 
         // store initial transform so we can restore on exit-vr
         const initPosAttr = arModel.getAttribute('position') || { x: 0, y: 0, z: -1 };
@@ -122,6 +125,16 @@ Github Copilot has been used to assist in writing this code, particularly for th
         reticle.setAttribute('rotation', '-90 0 0'); // lay flat on detected surface
         reticle.setAttribute('visible', 'false');
         scene.appendChild(reticle);
+
+        // // Create Lottie Animation for AR instructions
+        // const lottieInstructions = document.createElement('dotlottie-wc');
+        // lottieInstructions.setAttribute('id', 'lottieAnimation');
+        // lottieInstructions.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // scanning animation
+        // lottieInstructions.setAttribute('style', 'width: 300px; height: 300px; display: none; margin: 0 auto;');
+        // lottieInstructions.setAttribute('speed', '1');
+        // lottieInstructions.setAttribute('autoplay', '');
+        // lottieInstructions.setAttribute('loop', '');
+        // instructionAR.appendChild(lottieInstructions);
 
         // WebXR hit-test variables
         let xrSession = null;
@@ -166,30 +179,32 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     reticle.setAttribute('visible', 'true');
 
                     // Update DOM overlay: switch text to "Tap to place" and move box down
-                    if (scanMessage) {
-                        scanMessage.textContent = 'Tap to place the model';
-                        scanMessage.style.top = '70%'; // move the box further down
-                        scanMessage.style.transform = 'translateX(-50%)';
-                        lottieAnim.setAttribute('src', 'https://lottie.host/838b4e8e-a836-4b1d-9f06-00c9f0dedc8e/xQetxKwqpy.lottie'); // change animation to tap
+                    if (instructionAR) {
+                        instructionText.textContent = 'Tap to place the model';
+                        instructionAR.style.top = '70%'; // move the box further down
+                        instructionAR.style.transform = 'translateX(-50%)';
+                        lottieInstructions.setAttribute('src', 'https://lottie.host/838b4e8e-a836-4b1d-9f06-00c9f0dedc8e/xQetxKwqpy.lottie'); // change animation to tap
                     }
                 } else {
                     reticle.setAttribute('visible', 'false');
                     // revert DOM overlay to scanning hint
-                    if (scanMessage) {
-                        scanMessage.textContent = 'Scan the floor to place the model';
-                        scanMessage.style.top = '40%';
-                        scanMessage.style.transform = 'translateX(-50%)';
-                        lottieAnim.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // change animation to scanning
+                    if (instructionAR) {
+                        instructionText.textContent = 'Scan the floor to place the model';
+                        instructionAR.style.top = '40%';
+                        instructionAR.style.transform = 'translateX(-50%)';
+                        lottieInstructions.setAttribute('visible', 'true');
+                        lottieInstructions.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // change animation to scanning
                     }
                 }
             } else {
                 reticle.setAttribute('visible', 'false');
                 // revert DOM overlay to scanning hint
-                if (scanMessage) {
-                    scanMessage.textContent = 'Scan the floor to place the model';
-                    scanMessage.style.top = '40%';
-                    scanMessage.style.transform = 'translateX(-50%)';
-                    lottieAnim.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // change animation to scanning
+                if (instructionAR) {
+                    instructionText.textContent = 'Scan the floor to place the model';
+                    instructionAR.style.top = '40%';
+                    instructionAR.style.transform = 'translateX(-50%)';
+                    lottieInstructions.setAttribute('visible', 'true');
+                    lottieInstructions.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // change animation to scanning
                 }
             }
         }
@@ -217,12 +232,12 @@ Github Copilot has been used to assist in writing this code, particularly for th
             if (!xrSession) return;
 
             // show scan message overlay when AR starts
-            if (scanMessage) {
-                scanMessage.style.display = 'block';
-                scanMessage.textContent = 'Scan the floor to place the model';
-                scanMessage.style.top = '40%';
-                scanMessage.style.transform = 'translateX(-50%)';
-                lottieAnim.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // change animation to scanning
+            if (instructionAR) {
+                instructionAR.style.display = 'block';
+                instructionText.textContent = 'Scan the floor to place the model';
+                instructionAR.style.top = '40%';
+                instructionAR.style.transform = 'translateX(-50%)';
+                lottieInstructions.setAttribute('src', 'https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json'); // change animation to scanning
             }
 
             // single-use select handler: place once, then stop hit test
@@ -231,7 +246,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 placeModelAtReticle();
                 placed = true;
                 // hide overlay when model placed
-                if (scanMessage) scanMessage.style.display = 'none';
+                if (instructionAR) instructionAR.style.display = 'none';
 
                 // cleanup hit test and hide reticle after placement
                 stopHitTest();
@@ -286,7 +301,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             stopHitTest();
 
             // hide overlay message and label
-            if (scanMessage) scanMessage.style.display = 'none';
+            if (instructionAR) instructionAR.style.display = 'none';
         });
 
         // iOS detection (covers iPhone, iPad, iPod and Apple Silicon iPad handling) for Quick Look support
