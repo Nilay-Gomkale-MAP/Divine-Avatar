@@ -77,7 +77,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 scale="0.3 0.3 0.3"
                 animation-mixer
                 visible="true" 
-                sound="src: url(Strong-Wind.mp3); autoplay: true"
+                sound="src: url(Strong-Wind.mp3); loop: true;"
                 ></a-entity>
 
                 <!-- Custom AR Entry Buttons-->
@@ -212,6 +212,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             arModel.object3D.position.copy(reticle.object3D.position);
             arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
             arModel.setAttribute('visible', 'true');
+            arModel.component.sound.playSound(); // Play sound when model is placed
         }
 
         // Enter AR: hide the desktop model and start hit test for placement
@@ -294,6 +295,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             arModel.setAttribute('position', '0 0 -1');
             arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
             arModel.setAttribute('visible', 'true');
+            arModel.component.sound.stopSound(); // Stop sound when model when exiting AR
             cumulusBtn.style.display = 'none'; // hide Cumulus button on exit
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
@@ -310,8 +312,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
         }
 
         // If on iOS, show Quick Look (USDZ) button as a fallback and hide A-Frame AR entry
+        //Embed Audio into the USDZ file for IOS Quick Look
         if (isIOS()) {
-            const usdHref = 'model.usdz'; // USDZ file path
+            const usdHref = 'model.usdc'; // USDC file path
 
             // create a button element (works for both web and native bridge)
             const ql = document.createElement('a');
