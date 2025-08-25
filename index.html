@@ -360,11 +360,12 @@ Github Copilot has been used to assist in writing this code, particularly for th
             document.body.appendChild(flash);
 
             // Wait for A-Frame scene to load
-            const scene = document.querySelector('a-scene');
+            const arScene = document.querySelector('a-scene');
+            const arCanvas = arScene.renderer.domElement;
+
             scene.addEventListener('loaded', () => {
                 console.log('A-Frame scene loaded.');
                 
-                const arCanvas = document.querySelector('canvas');
                 if (!arCanvas) {
                 console.error('AR canvas not found!');
                 return;
