@@ -48,7 +48,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
             <a href="#" target="_blank" id="cumulusBtn" style="display: none;">
                 Learn More on Cumulus
             </a>
-            <button id="screenshot-btn" class="ar-screenshot-btn">📸</button>
         </div>
 
         <!-- AR Scene Setup Tag -->
@@ -349,45 +348,5 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 }
             });
         }
-
-        // SCREEN SHOTTING CODE (WORK IN PROGRESS)
-        document.addEventListener('DOMContentLoaded', () => {
-            const screenshotBtn = document.getElementById('screenshot-btn');
-
-            // Create flash effect overlay
-            const flash = document.createElement('div');
-            flash.className = 'flash-effect';
-            document.body.appendChild(flash);
-
-            // Wait for A-Frame scene to load
-            const scene = document.querySelector('a-scene');
-            scene.renderer.bufferPreserve = true; // Ensure the canvas is not cleared after rendering
-            
-            scene.addEventListener('loaded', () => {
-                console.log('A-Frame scene loaded.');
-                
-                const arCanvas = document.querySelector('.a-canvas');
-                if (!arCanvas) {
-                console.error('AR canvas not found!');
-                return;
-                }
-
-                screenshotBtn.addEventListener('click', () => {
-                // Flash feedback
-                flash.classList.add('flash-active');
-                setTimeout(() => flash.classList.remove('flash-active'), 200);
-
-                try {
-                    const dataURL = arCanvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.href = dataURL;
-                    link.download = `ar-screenshot-${Date.now()}.png`;
-                    link.click();
-                } catch (err) {
-                    console.error('Screenshot failed:', err);
-                }
-                });
-            });
-        });
     </script>
 </html>
