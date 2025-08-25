@@ -56,7 +56,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             <a-scene
                 id="ar-scene-container"
                 embedded
-                renderer="alpha: true; preserveDrawingBuffer: true;" 
+                renderer="alpha: true;" 
                 webxr="mode: ar; requiredFeatures: hit-test; referenceSpaceType: local; optionalFeatures: dom-overlay; overlayElement: #overlay"
                 xr-mode-ui="enabled: true; XRMode: ar; enterARButton: #enter-ar; exitARButton: #myExitARButton;"
                 vr-mode-ui="enabled: false"
@@ -105,6 +105,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
         // Query Selectors and initial setup
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
+        const overlay = document.getElementById('overlay');
         const arModel = document.querySelector('#arOnly');
         const entryBtn = document.getElementById('enter-ar');
         const exitBtn = document.getElementById('exit-ar');
@@ -355,18 +356,19 @@ Github Copilot has been used to assist in writing this code, particularly for th
             const screenshotBtn = document.getElementById('screenshot-btn');
             const flash = document.createElement('div');
             flash.className = 'flash-effect';
-            document.body.appendChild(flash);
+            overlay.appendChild(flash);
 
-            const scene = document.querySelector('a-scene');
+            const arScene = document.querySelector('a-scene');
+            arScene.renderer.preserveDrawingBuffer = true; // ensure canvas is not cleared
 
             function initScreenshot() {
-                if (!scene.renderer) {
+                if (!arScene.renderer) {
                 console.warn('Renderer not ready yet, retrying...');
                 setTimeout(initScreenshot, 500);
                 return;
                 }
 
-                const arCanvas = scene.renderer.domElement;
+                const arCanvas = arScene.renderer.domElement;
                 console.log('Canvas ready for screenshots');
 
                 screenshotBtn.addEventListener('click', () => {
@@ -389,9 +391,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
             // Use render-target-loaded if available
             scene.addEventListener('render-target-loaded', initScreenshot);
-
-            // Fallback after 2s if event doesn’t fire
-            setTimeout(initScreenshot, 2000);
         });
     </script>
 </html>
