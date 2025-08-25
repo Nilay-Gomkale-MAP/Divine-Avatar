@@ -71,7 +71,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
                 <!-- Preloading Audio Asset -->
                 <a-assets>
-                    <audio id="audio" src="Strong-Wind.mp3" preload="auto"></audio>
+                    <audio id="modelAudio" src="Strong-Wind.mp3" preload="auto"></audio>
                 </a-assets>
 
                 <!-- AR Model entity: start invisible in AR so ar-hit-test can place it, needs to start visible in Webpage mode for now-->
@@ -84,13 +84,13 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 visible="true"
                 >
                     <!-- Sound component attached to the model entity -->
-                    <a-entity sound="src: #audio; loop: true;"></a-entity>
+                    <a-entity sound="src: #audio; loop: true; autoplay: false"></a-entity>
                 </a-entity>
 
                 
 
                 <!-- Custom AR Entry Buttons-->
-                <a-entity id="enter-ar">Click to Start AR</a-entity>
+                <a-entity id="enter-ar" style="bottom: 0;">Click to Start AR</a-entity>
                 <a-entity exit-ar-button="element: #exit-ar"></a-entity>
                 
                 <!-- Camera with orbit controls for desktop and non-AR mode -->
@@ -115,7 +115,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
         const scene = document.querySelector('a-scene');
         const camera = scene.querySelector('[camera]');
         const arModel = document.querySelector('#arOnly');
-        const sound = document.querySelector('[sound]');
+        const arSound = document.querySelector('#modelAudio'); // Select the sound entity
 
         // Custom AR buttons
         const entryBtn = document.getElementById('enter-ar');
@@ -238,7 +238,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             camera.setAttribute('orbit-controls', 'enabled', false);
 
             if (placed==true){
-                sound.component.sound.playSound(); // Play sound when model is placed in AR
+                arSound.component.sound.playSound(); // Play sound when model is placed in AR
             }
 
             xrSession = scene.renderer.xr.getSession();
@@ -310,7 +310,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             arModel.setAttribute('position', '0 0 -1');
             arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
             arModel.setAttribute('visible', 'true');
-            sound.component.sound.stopSound(); // Stop sound when model when exiting AR
+            arSound.component.sound.stopSound(); // Stop sound when model when exiting AR
             cumulusBtn.style.display = 'none'; // hide Cumulus button on exit
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
