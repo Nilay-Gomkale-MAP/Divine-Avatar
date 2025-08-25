@@ -359,10 +359,18 @@ Github Copilot has been used to assist in writing this code, particularly for th
 
             const scene = document.querySelector('a-scene');
 
-            scene.addEventListener('render-target-loaded', () => {
-                const arCanvas = scene.renderer.domElement; // ✅ Now it's safe to access
+            function initScreenshot() {
+                if (!scene.renderer) {
+                console.warn('Renderer not ready yet, retrying...');
+                setTimeout(initScreenshot, 500);
+                return;
+                }
+
+                const arCanvas = scene.renderer.domElement;
+                console.log('Canvas ready for screenshots');
 
                 screenshotBtn.addEventListener('click', () => {
+                console.log('Screenshot clicked');
                 flash.classList.add('flash-active');
                 setTimeout(() => flash.classList.remove('flash-active'), 200);
 
@@ -372,12 +380,18 @@ Github Copilot has been used to assist in writing this code, particularly for th
                     link.href = dataURL;
                     link.download = `ar-screenshot-${Date.now()}.png`;
                     link.click();
+                    console.log('Screenshot saved');
                 } catch (err) {
                     console.error('Screenshot failed:', err);
                 }
                 });
-            });
-        });
+            }
 
+            // Use render-target-loaded if available
+            scene.addEventListener('render-target-loaded', initScreenshot);
+
+            // Fallback after 2s if event doesn’t fire
+            setTimeout(initScreenshot, 2000);
+        });
     </script>
 </html>
