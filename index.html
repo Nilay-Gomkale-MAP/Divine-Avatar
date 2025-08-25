@@ -237,6 +237,10 @@ Github Copilot has been used to assist in writing this code, particularly for th
             camera.setAttribute('look-controls', 'enabled', true);
             camera.setAttribute('orbit-controls', 'enabled', false);
 
+            if (placed==true){
+                sound.component.sound.playSound(); // Play sound when model is placed in AR
+            }
+
             xrSession = scene.renderer.xr.getSession();
             if (!xrSession) return;
 
@@ -253,7 +257,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
             onSelectHandler = () => {
                 if (placed) return;
                 placeModelAtReticle();
-                sound.component.sound.playSound(); // Play sound when model is placed
                 placed = true;
                 // hide overlay when model placed
                 if (instructionAR) instructionAR.style.display = 'none';
