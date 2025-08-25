@@ -9,7 +9,7 @@ body, html {
     /* overflow: hidden;
     height: 100%; */
     /* center the spotlight vertically (50%), keep brighter inner spot and wider radius */
-    background: #000000;
+    background: #222222;
 }
 
 /* AR SET UP */
@@ -25,7 +25,8 @@ body, html {
 
 /* Applying the Gradient on the A-Frame Canvas for Temporary Measure */
 canvas {
-    background: radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed;
+    /* background: radial-gradient(circle at 50% 50%, #4a4a4a 0%, #272727 30%, #000 72%) fixed; */
+    background: transparent;
     height: 100%;
 }
 
@@ -92,18 +93,17 @@ canvas {
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.6);
     color: #ffffff;
-    padding: 12px 18px;
+    padding: 8px 12px;
     border-radius: 6px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 16px;
     text-align: center;
     z-index: 10002;
     gap: 12px;
     font-weight: bold;
+    width: 60%;
 }
 
-.ar-overlay-lottie, dotlottie-wc {
-    width: 150px;
+.ar-overlay-lottie {
+    width: auto;
     height: 150px;
     margin: 0 auto;
 }
@@ -111,7 +111,6 @@ canvas {
 /* AR SET UP END */
 
 h1 {
-    font-family: Arial, Helvetica, sans-serif;
     font-size: 2rem;
     text-align: center;
     margin: 20px 0px;
