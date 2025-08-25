@@ -212,7 +212,6 @@ Github Copilot has been used to assist in writing this code, particularly for th
             arModel.object3D.position.copy(reticle.object3D.position);
             arModel.object3D.quaternion.copy(reticle.object3D.quaternion);
             arModel.setAttribute('visible', 'true');
-            //arModel.component.sound.playSound(); // Play sound when model is placed
         }
 
         // Enter AR: hide the desktop model and start hit test for placement
@@ -242,6 +241,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             onSelectHandler = () => {
                 if (placed) return;
                 placeModelAtReticle();
+                arModel.component.sound.playSound(); // Play sound when model is placed
                 placed = true;
                 // hide overlay when model placed
                 if (instructionAR) instructionAR.style.display = 'none';
