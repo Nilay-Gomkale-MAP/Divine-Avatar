@@ -83,11 +83,12 @@ canvas {
 }
 
 /* DOM overlay message shown while scanning for surfaces */
-.ar-overlay-message {
+.ar-overlay-instruction {
     pointer-events: auto;
     position: absolute;
     left: 50%;
     top: 40%;
+    gap: 20px;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.6);
     color: #ffffff;
@@ -98,6 +99,13 @@ canvas {
     text-align: center;
     z-index: 10002;
     gap: 12px;
+    font-weight: bold;
+}
+
+.ar-overlay-lottie, dotlottie-wc {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
 }
 
 /* AR SET UP END */
