@@ -45,6 +45,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 <dotlottie-wc id="ar-overlay-lottie" src="https://lottie.host/9aa60015-71cb-4d13-9ccf-f87f52b559b7/X9LJdCou9p.json" speed="1" autoplay loop></dotlottie-wc>
                 <p id="ar-overlay-text">Scan the area to place the model</p>
             </div>
+            <a href="#" target="_blank" id="cumulusBtn" style="display: none;">
+                Learn More on Cumulus
+            </a>
         </div>
 
         <!-- AR Scene Setup Tag -->
@@ -104,6 +107,9 @@ Github Copilot has been used to assist in writing this code, particularly for th
         const arModel = document.querySelector('#arOnly');
         const entryBtn = document.getElementById('enter-ar');
         const exitBtn = document.getElementById('exit-ar');
+        const cumulusBtn = document.getElementById('cumulusBtn');
+
+        // DOM overlay elements for AR instructions
         const instructionAR = document.getElementById('ar-overlay-instruction'); // NEW
         const instructionText = document.getElementById('ar-overlay-text'); // NEW
         const lottieInstructions = document.getElementById('ar-overlay-lottie'); // NEW
@@ -237,6 +243,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
                 placed = true;
                 // hide overlay when model placed
                 if (instructionAR) instructionAR.style.display = 'none';
+                if (cumulusBtn) cumulusBtn.style.display = 'block'; // show Cumulus button after placement
 
                 // cleanup hit test and hide reticle after placement
                 stopHitTest();
@@ -286,6 +293,7 @@ Github Copilot has been used to assist in writing this code, particularly for th
             arModel.setAttribute('position', '0 0 -1');
             arModel.setAttribute('scale', '0.3 0.3 0.3'); // Reset scale for webpage view
             arModel.setAttribute('visible', 'true');
+            cumulusBtn.style.display = 'none'; // hide Cumulus button on exit
             entryBtn.style.display = 'block'; // Show Entry button
             exitBtn.style.display = 'none';   // Hide Exit button
             stopHitTest();
